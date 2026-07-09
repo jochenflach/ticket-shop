@@ -668,88 +668,128 @@ function TicketShopContent() {
                 <p>Lade Saalplan...</p>
               </div>
             ) : (
-              <div className={styles.svgContainer}>
-                <svg viewBox="0 0 1000 800" className={styles.svgSeatmap}>
-                  {/* Stage (Bühne) */}
-                  <line 
-                    x1="300" 
-                    y1="35" 
-                    x2="700" 
-                    y2="35" 
-                    stroke="var(--accent)" 
-                    strokeWidth="8" 
-                    strokeLinecap="round"
-                    className={styles.stagePath}
-                  />
-                  <text x="500" y="55" textAnchor="middle" className={styles.stageText}>BÜHNE</text>
+              (() => {
+                // Calculate dynamic bounding box of seats to crop out margins
+                let viewBox = "0 0 1000 800";
+                let stageX1 = 300;
+                let stageX2 = 700;
+                let stageY = 35;
+                let stageTextY = 55;
 
-                  {/* Render Rows and Seats */}
-                  {Object.entries(rows).map(([rowNumStr, rowSeats]) => {
-                    const rowNum = parseInt(rowNumStr);
-                    
-                    const firstSeatY = rowSeats[0]?.y ?? (90 + (rowNum - 1) * 28 + (rowNum >= 7 ? 24 : 0));
-                    const labelY = firstSeatY;
+                if (seats.length > 0) {
+                  const xCoords = seats.map(s => s.x);
+                  const yCoords = seats.map(s => s.y);
+                  const minX = Math.min(...xCoords);
+                  const maxX = Math.max(...xCoords);
+                  const minY = Math.min(...yCoords);
+                  const maxY = Math.max(...yCoords);
 
-                    return (
-                      <g key={rowNum} className={styles.seatRowGroup}>
-                        {/* Row label left */}
-                        <text x="15" y={labelY + 14} className={styles.rowLabelText}>R {rowNum}</text>
+                  const paddingX = 40;
+                  const paddingBottom = 40;
 
-                        {/* Seats */}
-                        {rowSeats.map((seat) => {
-                          const x = seat.x;
-                          const y = seat.y;
+                  const svgMinX = Math.max(0, minX - paddingX);
+                  const stageWidth = Math.min(400, Math.max(150, maxX - minX));
+                  const centerX = (minX + maxX) / 2;
+                  stageX1 = centerX - stageWidth / 2;
+                  stageX2 = centerX + stageWidth / 2;
+                  stageY = Math.max(10, minY - 50);
+                  stageTextY = stageY + 20;
 
-                          let seatColorClass = styles.svgSeatFree;
-                          let strokeColor = '';
-                          
-                          if (seat.category === 'KAT1') strokeColor = 'var(--cat-kat1)';
-                          else strokeColor = 'var(--cat-kat2)';
+                  const svgMinY = Math.max(0, stageY - 35);
+                  const svgWidth = (maxX + 18 + paddingX) - svgMinX;
+                  const svgHeight = (maxY + 18 + paddingBottom) - svgMinY;
 
-                          if (seat.status === 'booked') {
-                            seatColorClass = styles.svgSeatBooked;
-                          } else if (seat.status === 'locked') {
-                            seatColorClass = seat.isMine ? styles.svgSeatSelected : styles.svgSeatLocked;
-                          }
+                  viewBox = `${svgMinX} ${svgMinY} ${svgWidth} ${svgHeight}`;
+                }
 
-                          return (
-                            <g key={seat.id} className={styles.seatGroup}>
-                              <rect
-                                x={x}
-                                y={y}
-                                width="18"
-                                height="18"
-                                rx="4"
-                                className={`${styles.svgSeat} ${seatColorClass}`}
-                                style={{ stroke: seat.status === 'free' ? strokeColor : undefined }}
-                                onClick={() => seat.status !== 'booked' && (seat.status !== 'locked' || seat.isMine) && handleSeatClick(seat)}
-                              >
-                                <title>
-                                  {`Reihe ${seat.row}, Platz ${seat.number}\nKategorie: ${seat.category}\nPreis: ${seat.price.toFixed(2)} €\nStatus: ${
-                                    seat.status === 'booked' ? 'Belegt' : seat.status === 'locked' ? (seat.isMine ? 'Ausgewählt' : 'Reserviert') : 'Frei'
-                                  }`}
-                                </title>
-                              </rect>
-                              {/* Seat number inside rect for readability when zoomed */}
-                              <text 
-                                x={x + 9} 
-                                y={y + 12} 
-                                textAnchor="middle" 
-                                className={styles.seatNumberInside}
-                              >
-                                {seat.number}
-                              </text>
-                            </g>
-                          );
-                        })}
+                return (
+                  <div className={styles.svgContainer}>
+                    <svg viewBox={viewBox} className={styles.svgSeatmap}>
+                      {/* Stage (Bühne) */}
+                      <line 
+                        x1={stageX1} 
+                        y1={stageY} 
+                        x2={stageX2} 
+                        y2={stageY} 
+                        stroke="var(--accent)" 
+                        strokeWidth="8" 
+                        strokeLinecap="round"
+                        className={styles.stagePath}
+                      />
+                      <text x={(stageX1 + stageX2) / 2} y={stageTextY} textAnchor="middle" className={styles.stageText}>BÜHNE</text>
 
-                        {/* Row label right */}
-                        <text x="615" y={labelY + 14} className={styles.rowLabelText}>R {rowNum}</text>
-                      </g>
-                    );
-                  })}
-                </svg>
-              </div>
+                      {/* Render Rows and Seats */}
+                      {Object.entries(rows).map(([rowNumStr, rowSeats]) => {
+                        const rowNum = parseInt(rowNumStr);
+                        
+                        const firstSeatY = rowSeats[0]?.y ?? (90 + (rowNum - 1) * 28 + (rowNum >= 7 ? 24 : 0));
+                        const labelY = firstSeatY;
+
+                        const leftSeatX = rowSeats.length > 0 ? Math.min(...rowSeats.map(s => s.x)) : 15;
+                        const rightSeatX = rowSeats.length > 0 ? Math.max(...rowSeats.map(s => s.x)) : 615;
+
+                        return (
+                          <g key={rowNum} className={styles.seatRowGroup}>
+                            {/* Row label left */}
+                            <text x={leftSeatX - 25} y={labelY + 14} className={styles.rowLabelText}>R {rowNum}</text>
+
+                            {/* Seats */}
+                            {rowSeats.map((seat) => {
+                              const x = seat.x;
+                              const y = seat.y;
+
+                              let seatColorClass = styles.svgSeatFree;
+                              let strokeColor = '';
+                              
+                              if (seat.category === 'KAT1') strokeColor = 'var(--cat-kat1)';
+                              else strokeColor = 'var(--cat-kat2)';
+
+                              if (seat.status === 'booked') {
+                                seatColorClass = styles.svgSeatBooked;
+                              } else if (seat.status === 'locked') {
+                                seatColorClass = seat.isMine ? styles.svgSeatSelected : styles.svgSeatLocked;
+                              }
+
+                              return (
+                                <g key={seat.id} className={styles.seatGroup}>
+                                  <rect
+                                    x={x}
+                                    y={y}
+                                    width="18"
+                                    height="18"
+                                    rx="4"
+                                    className={`${styles.svgSeat} ${seatColorClass}`}
+                                    style={{ stroke: seat.status === 'free' ? strokeColor : undefined }}
+                                    onClick={() => seat.status !== 'booked' && (seat.status !== 'locked' || seat.isMine) && handleSeatClick(seat)}
+                                  >
+                                    <title>
+                                      {`Reihe ${seat.row}, Platz ${seat.number}\nKategorie: ${seat.category}\nPreis: ${seat.price.toFixed(2)} €\nStatus: ${
+                                        seat.status === 'booked' ? 'Belegt' : seat.status === 'locked' ? (seat.isMine ? 'Ausgewählt' : 'Reserviert') : 'Frei'
+                                      }`}
+                                    </title>
+                                  </rect>
+                                  {/* Seat number inside rect for readability when zoomed */}
+                                  <text 
+                                    x={x + 9} 
+                                    y={y + 12} 
+                                    textAnchor="middle" 
+                                    className={styles.seatNumberInside}
+                                  >
+                                    {seat.number}
+                                  </text>
+                                </g>
+                              );
+                            })}
+
+                            {/* Row label right */}
+                            <text x={rightSeatX + 18 + 10} y={labelY + 14} className={styles.rowLabelText}>R {rowNum}</text>
+                          </g>
+                        );
+                      })}
+                    </svg>
+                  </div>
+                );
+              })()
             )}
           </div>
         </section>
