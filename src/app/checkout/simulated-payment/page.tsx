@@ -27,6 +27,7 @@ function SimulatedPaymentContent() {
   const orderId = searchParams.get('orderId');
   const sessionId = searchParams.get('sessionId');
   const ticketTypesRaw = searchParams.get('ticketTypes');
+  const eventId = searchParams.get('eventId');
 
   const [loading, setLoading] = useState(true);
   const [paying, setPaying] = useState(false);
@@ -60,8 +61,8 @@ function SimulatedPaymentContent() {
           return;
         }
 
-        // 2. Fetch seats locked by this session
-        const seatsResponse = await fetch('/api/seats', {
+        // 2. Fetch seats locked by this session for this event
+        const seatsResponse = await fetch(`/api/seats?eventId=${eventId}`, {
           headers: {
             'x-session-id': sessionId || '',
           },
@@ -83,7 +84,7 @@ function SimulatedPaymentContent() {
     };
 
     fetchOrderDetails();
-  }, [orderId, sessionId]);
+  }, [orderId, sessionId, eventId]);
 
   const handleSimulatePayment = async () => {
     if (!orderId || paying) return;
@@ -102,6 +103,7 @@ function SimulatedPaymentContent() {
           orderId,
           seatIds,
           ticketTypes,
+          eventId,
         }),
       });
 

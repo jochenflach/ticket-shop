@@ -4,9 +4,23 @@ import { prisma } from '@/lib/db';
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
+    const eventId = searchParams.get('eventId');
     const sessionId = request.headers.get('x-session-id') || '';
 
-    // 1. Clean up expired locks (older than 12 minutes)
+    if (!eventId) {
+      return NextResponse.json({ error: 'eventId ist erforderlich.' }, { status: 400 });
+    }
+
+    // 1. Fetch Event and layout info
+    const event = await prisma.event.findUnique({
+      where: { id: eventId },
+    });
+
+    if (!event) {
+      return NextResponse.json({ error: 'Veranstaltung nicht gefunden.' }, { status: 404 });
+    }
+
+    // 2. Clean up expired locks (older than 12 minutes) across all events
     const twelveMinutesAgo = new Date(Date.now() - 12 * 60 * 1000);
     await prisma.seatLock.deleteMany({
       where: {
@@ -16,21 +30,29 @@ export async function GET(request: Request) {
       },
     });
 
-    // 2. Fetch all seats
+    // 3. Fetch all seats for the event's layout
     const seats = await prisma.seat.findMany({
+      where: {
+        layoutId: event.layoutId,
+      },
       orderBy: [
         { row: 'asc' },
         { number: 'asc' },
       ],
     });
 
-    // 3. Fetch active locks
-    const locks = await prisma.seatLock.findMany();
+    // 4. Fetch active locks for this specific event
+    const locks = await prisma.seatLock.findMany({
+      where: {
+        eventId: eventId,
+      },
+    });
     const locksMap = new Map(locks.map((l) => [l.seatId, l]));
 
-    // 4. Fetch booked seats (tickets belonging to PAID orders)
+    // 5. Fetch booked seats (tickets belonging to PAID orders for this event)
     const bookedTickets = await prisma.ticket.findMany({
       where: {
+        eventId: eventId,
         order: {
           status: 'PAID',
         },
@@ -41,7 +63,7 @@ export async function GET(request: Request) {
     });
     const bookedSeatIds = new Set(bookedTickets.map((t) => t.seatId));
 
-    // 5. Combine and map seat statuses
+    // 6. Combine and map seat statuses
     const seatData = seats.map((seat) => {
       let status: 'free' | 'locked' | 'booked' = 'free';
       let lockedBy = '';

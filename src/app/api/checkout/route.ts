@@ -28,10 +28,10 @@ function getSeatPrice(price: number, type: string) {
 
 export async function POST(request: Request) {
   try {
-    const { sessionId, customerName, customerEmail, seatIds, source, sellerPin, promoCode, ticketTypes } = await request.json();
+    const { sessionId, customerName, customerEmail, seatIds, source, sellerPin, promoCode, ticketTypes, eventId } = await request.json();
 
-    if (!customerName || !customerEmail || !seatIds || !Array.isArray(seatIds) || seatIds.length === 0) {
-      return NextResponse.json({ error: 'Bitte füllen Sie alle erforderlichen Felder aus.' }, { status: 400 });
+    if (!customerName || !customerEmail || !seatIds || !Array.isArray(seatIds) || seatIds.length === 0 || !eventId) {
+      return NextResponse.json({ error: 'Bitte füllen Sie alle erforderlichen Felder aus (einschließlich Veranstaltung).' }, { status: 400 });
     }
 
     // 1. Fetch seat details
@@ -65,10 +65,11 @@ export async function POST(request: Request) {
 
       // POS Transaction - immediately complete order
       const order = await prisma.$transaction(async (tx) => {
-        // Double check booking status of seats
+        // Double check booking status of seats for this event
         const booked = await tx.ticket.findFirst({
           where: {
             seatId: { in: seatIds },
+            eventId: eventId,
             order: {
               status: 'PAID',
             },
@@ -98,6 +99,7 @@ export async function POST(request: Request) {
             data: {
               orderId: createdOrder.id,
               seatId: seat.id,
+              eventId: eventId,
               ticketType: type,
               pricePaid,
               ticketCode: generateTicketCode(),
@@ -105,10 +107,11 @@ export async function POST(request: Request) {
           });
         }
 
-        // Clean up locks
+        // Clean up locks for this event
         await tx.seatLock.deleteMany({
           where: {
             seatId: { in: seatIds },
+            eventId: eventId,
           },
         });
 
@@ -129,10 +132,11 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Session-ID fehlt.' }, { status: 400 });
     }
 
-    // Verify seats are still locked by this session
+    // Verify seats are still locked by this session for this event
     const activeLocks = await prisma.seatLock.findMany({
       where: {
         seatId: { in: seatIds },
+        eventId: eventId,
         lockedBy: sessionId,
       },
     });
@@ -222,13 +226,14 @@ export async function POST(request: Request) {
         line_items: stripeLineItems,
         mode: 'payment',
         success_url: `${origin}/checkout/success?orderId=${pendingOrder.id}&stripe_session_id={CHECKOUT_SESSION_ID}`,
-        cancel_url: `${origin}/?sessionId=${sessionId}`,
+        cancel_url: `${origin}/?sessionId=${sessionId}&eventId=${eventId}`,
         customer_email: customerEmail,
         metadata: {
           orderId: pendingOrder.id,
           seatIds: JSON.stringify(seatIds),
           sessionId,
           ticketTypes: JSON.stringify(ticketTypes || {}),
+          eventId, // <-- Pass eventId!
         },
       });
 
@@ -248,7 +253,7 @@ export async function POST(request: Request) {
       const encodedTicketTypes = encodeURIComponent(JSON.stringify(ticketTypes || {}));
       return NextResponse.json({
         success: true,
-        redirectUrl: `/checkout/simulated-payment?orderId=${pendingOrder.id}&sessionId=${sessionId}&ticketTypes=${encodedTicketTypes}`,
+        redirectUrl: `/checkout/simulated-payment?orderId=${pendingOrder.id}&sessionId=${sessionId}&ticketTypes=${encodedTicketTypes}&eventId=${eventId}`,
       });
     }
   } catch (error: any) {

@@ -19,10 +19,10 @@ function getSeatPrice(price: number, type: string) {
 
 export async function POST(request: Request) {
   try {
-    const { orderId, seatIds, ticketTypes } = await request.json();
+    const { orderId, seatIds, ticketTypes, eventId } = await request.json();
 
-    if (!orderId || !seatIds || !Array.isArray(seatIds)) {
-      return NextResponse.json({ error: 'Ungültige Parameter.' }, { status: 400 });
+    if (!orderId || !seatIds || !Array.isArray(seatIds) || !eventId) {
+      return NextResponse.json({ error: 'Ungültige Parameter. eventId, orderId und seatIds sind erforderlich.' }, { status: 400 });
     }
 
     const result = await prisma.$transaction(async (tx) => {
@@ -44,10 +44,11 @@ export async function POST(request: Request) {
         where: { id: { in: seatIds } },
       });
 
-      // 3. Double check if seats are booked
+      // 3. Double check if seats are booked for this event
       const alreadyBooked = await tx.ticket.findFirst({
         where: {
           seatId: { in: seatIds },
+          eventId: eventId,
           order: { status: 'PAID' },
         },
       });
@@ -80,6 +81,7 @@ export async function POST(request: Request) {
           data: {
             orderId,
             seatId: seat.id,
+            eventId: eventId,
             ticketType: type,
             pricePaid,
             ticketCode: generateTicketCode(),
@@ -87,10 +89,11 @@ export async function POST(request: Request) {
         });
       }
 
-      // 6. Delete locks
+      // 6. Delete locks for this event
       await tx.seatLock.deleteMany({
         where: {
           seatId: { in: seatIds },
+          eventId: eventId,
         },
       });
 

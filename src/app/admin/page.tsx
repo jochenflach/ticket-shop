@@ -1,7 +1,22 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { KeyRound, ShieldAlert, Plus, Trash2, CheckCircle2, XCircle, Tag, Percent, Euro } from 'lucide-react';
+import { 
+  KeyRound, 
+  Plus, 
+  Trash2, 
+  CheckCircle2, 
+  XCircle, 
+  Tag, 
+  Percent, 
+  Euro, 
+  Calendar, 
+  Clock, 
+  MapPin, 
+  Compass, 
+  ChevronRight,
+  Sparkles
+} from 'lucide-react';
 import styles from './admin.module.css';
 
 interface PromoCode {
@@ -15,20 +30,49 @@ interface PromoCode {
   createdAt: string;
 }
 
+interface EventDB {
+  id: string;
+  title: string;
+  date: string;
+  description: string | null;
+  layoutId: string;
+  layout: {
+    name: string;
+  };
+}
+
+interface LayoutDB {
+  id: string;
+  name: string;
+}
+
 export default function AdminDashboard() {
+  // Auth state
   const [pin, setPin] = useState('');
   const [isAuthorized, setIsAuthorized] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [promoCodes, setPromoCodes] = useState<PromoCode[]>([]);
   const [loading, setLoading] = useState(false);
 
-  // Form state
+  // Content states
+  const [promoCodes, setPromoCodes] = useState<PromoCode[]>([]);
+  const [events, setEvents] = useState<EventDB[]>([]);
+  const [layouts, setLayouts] = useState<LayoutDB[]>([]);
+
+  // Promo Code Form state
   const [newCode, setNewCode] = useState('');
   const [newType, setNewType] = useState<'PERCENT' | 'FIXED'>('PERCENT');
   const [newValue, setNewValue] = useState('');
   const [newMaxUses, setNewMaxUses] = useState('');
   const [formError, setFormError] = useState<string | null>(null);
   const [formSuccess, setFormSuccess] = useState(false);
+
+  // Event Form state
+  const [eventTitle, setEventTitle] = useState('');
+  const [eventDate, setEventDate] = useState('');
+  const [eventDescription, setEventDescription] = useState('');
+  const [eventLayoutId, setEventLayoutId] = useState('');
+  const [eventFormError, setEventFormError] = useState<string | null>(null);
+  const [eventFormSuccess, setEventFormSuccess] = useState(false);
 
   // Load PIN from sessionStorage if exists
   useEffect(() => {
@@ -42,18 +86,39 @@ export default function AdminDashboard() {
     setLoading(true);
     setError(null);
     try {
-      const response = await fetch('/api/admin/promo', {
-        headers: {
-          'x-admin-pin': enteredPin,
-        },
+      // 1. Verify access & load promos
+      const promoResponse = await fetch('/api/admin/promo', {
+        headers: { 'x-admin-pin': enteredPin },
       });
-      const data = await response.json();
-      if (response.ok) {
+      const promoData = await promoResponse.json();
+
+      if (promoResponse.ok) {
         setIsAuthorized(true);
-        setPromoCodes(data.promoCodes);
+        setPromoCodes(promoData.promoCodes);
         sessionStorage.setItem('admin_session_pin', enteredPin);
+
+        // 2. Fetch events
+        const eventsResponse = await fetch('/api/admin/events', {
+          headers: { 'x-admin-pin': enteredPin },
+        });
+        const eventsData = await eventsResponse.json();
+        if (eventsResponse.ok && eventsData.events) {
+          setEvents(eventsData.events);
+        }
+
+        // 3. Fetch layouts
+        const layoutsResponse = await fetch('/api/admin/seatmap/layouts', {
+          headers: { 'x-admin-pin': enteredPin },
+        });
+        const layoutsData = await layoutsResponse.json();
+        if (layoutsResponse.ok && layoutsData.layouts) {
+          setLayouts(layoutsData.layouts);
+          if (layoutsData.layouts.length > 0 && !eventLayoutId) {
+            setEventLayoutId(layoutsData.layouts[0].id);
+          }
+        }
       } else {
-        setError(data.error || 'Ungültige Admin-PIN.');
+        setError(promoData.error || 'Ungültige Admin-PIN.');
         sessionStorage.removeItem('admin_session_pin');
       }
     } catch (err) {
@@ -116,7 +181,6 @@ export default function AdminDashboard() {
         setNewCode('');
         setNewValue('');
         setNewMaxUses('');
-        // Reload list
         verifyAndLoad(activePin);
       } else {
         setFormError(data.error || 'Erstellung fehlgeschlagen.');
@@ -134,9 +198,7 @@ export default function AdminDashboard() {
     try {
       const response = await fetch(`/api/admin/promo?id=${id}`, {
         method: 'DELETE',
-        headers: {
-          'x-admin-pin': activePin,
-        },
+        headers: { 'x-admin-pin': activePin },
       });
 
       if (response.ok) {
@@ -151,11 +213,100 @@ export default function AdminDashboard() {
     }
   };
 
+  const handleCreateEvent = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setEventFormError(null);
+    setEventFormSuccess(false);
+
+    if (!eventTitle || !eventDate || !eventLayoutId) {
+      setEventFormError('Bitte füllen Sie alle Pflichtfelder aus.');
+      return;
+    }
+
+    const activePin = pin || sessionStorage.getItem('admin_session_pin') || '';
+
+    try {
+      const response = await fetch('/api/admin/events', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-admin-pin': activePin,
+        },
+        body: JSON.stringify({
+          title: eventTitle,
+          date: new Date(eventDate).toISOString(),
+          description: eventDescription || null,
+          layoutId: eventLayoutId,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok && data.success) {
+        setEventFormSuccess(true);
+        setEventTitle('');
+        setEventDate('');
+        setEventDescription('');
+        verifyAndLoad(activePin);
+      } else {
+        setEventFormError(data.error || 'Erstellung der Veranstaltung fehlgeschlagen.');
+      }
+    } catch (err: any) {
+      console.error(err);
+      setEventFormError('Fehler: ' + err.message);
+    }
+  };
+
+  const handleDeleteEvent = async (id: string, name: string) => {
+    const confirmDelete = confirm(
+      `Möchten Sie die Veranstaltung "${name}" wirklich löschen?\n` +
+      'Das ist nur möglich, wenn noch keine Tickets dafür gebucht wurden.'
+    );
+    if (!confirmDelete) return;
+
+    const activePin = pin || sessionStorage.getItem('admin_session_pin') || '';
+
+    try {
+      const response = await fetch(`/api/admin/events?id=${id}`, {
+        method: 'DELETE',
+        headers: { 'x-admin-pin': activePin },
+      });
+
+      const data = await response.json();
+      if (response.ok) {
+        verifyAndLoad(activePin);
+      } else {
+        alert(data.error || 'Löschen fehlgeschlagen.');
+      }
+    } catch (err: any) {
+      console.error(err);
+      alert('Fehler beim Löschen: ' + err.message);
+    }
+  };
+
   const handleLogout = () => {
     sessionStorage.removeItem('admin_session_pin');
     setIsAuthorized(false);
     setPin('');
     setPromoCodes([]);
+    setEvents([]);
+    setLayouts([]);
+  };
+
+  const formatEventDate = (dateString: string) => {
+    try {
+      const d = new Date(dateString);
+      return d.toLocaleDateString('de-DE', {
+        weekday: 'short',
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      }) + ' Uhr';
+    } catch (e) {
+      return dateString;
+    }
   };
 
   // ==========================================
@@ -169,7 +320,7 @@ export default function AdminDashboard() {
           <div className={styles.loginHeader}>
             <KeyRound size={48} className={styles.goldText} />
             <h1>Admin-Dashboard</h1>
-            <p>Bitte geben Sie die Admin-PIN ein, um Gutscheincodes zu verwalten.</p>
+            <p>Bitte geben Sie die Admin-PIN ein, um den Ticketshop zu verwalten.</p>
           </div>
 
           {error && <div className={styles.errorAlert}>{error}</div>}
@@ -205,8 +356,11 @@ export default function AdminDashboard() {
       
       <header className={styles.header}>
         <div>
-          <h1>Rabattcode-Manager</h1>
-          <p className={styles.subtitle}>Gutscheine erstellen, überwachen und deaktivieren</p>
+          <h1 style={{display: 'flex', alignItems: 'center', gap: '0.5rem'}}>
+            <Sparkles size={26} style={{color: '#fbbf24'}} />
+            Admin-Dashboard
+          </h1>
+          <p className={styles.subtitle}>Veranstaltungen, Saalpläne und Rabattcodes verwalten</p>
         </div>
         <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
           <a href="/admin/seatmap" className={styles.logoutButton} style={{ textDecoration: 'none', backgroundColor: '#d97706', color: '#fff', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -218,11 +372,136 @@ export default function AdminDashboard() {
         </div>
       </header>
 
+      {/* Row 1: Events Section */}
+      <div className={styles.grid} style={{ marginBottom: '2.5rem' }}>
+        
+        {/* Left: Create Event */}
+        <section className={`${styles.card} glass`}>
+          <div className={styles.cardHeader}>
+            <h2>Veranstaltung anlegen</h2>
+          </div>
+
+          {eventFormError && <div className={styles.errorAlert}>{eventFormError}</div>}
+          {eventFormSuccess && <div className={styles.successAlert}>Veranstaltung erfolgreich angelegt!</div>}
+
+          <form onSubmit={handleCreateEvent} className={styles.form}>
+            <div className={styles.formGroup}>
+              <label htmlFor="eventTitle">Titel der Vorstellung</label>
+              <input
+                type="text"
+                id="eventTitle"
+                required
+                placeholder="z.B. Das Wilde Weib - Samstagsshow"
+                value={eventTitle}
+                onChange={(e) => setEventTitle(e.target.value)}
+              />
+            </div>
+
+            <div className={styles.formGroup}>
+              <label htmlFor="eventDate">Datum & Uhrzeit (Einlass/Beginn)</label>
+              <input
+                type="datetime-local"
+                id="eventDate"
+                required
+                value={eventDate}
+                onChange={(e) => setEventDate(e.target.value)}
+              />
+            </div>
+
+            <div className={styles.formGroup}>
+              <label htmlFor="eventLayout">Zugeordneter Saalplan (Vorlage)</label>
+              <select
+                id="eventLayout"
+                required
+                value={eventLayoutId}
+                onChange={(e) => setEventLayoutId(e.target.value)}
+              >
+                {layouts.length === 0 ? (
+                  <option value="">Keine Saalpläne vorhanden (Bitte erst erstellen)</option>
+                ) : (
+                  layouts.map(l => (
+                    <option key={l.id} value={l.id}>{l.name}</option>
+                  ))
+                )}
+              </select>
+            </div>
+
+            <div className={styles.formGroup}>
+              <label htmlFor="eventDescription">Beschreibung / Zusatzinfos (optional)</label>
+              <textarea
+                id="eventDescription"
+                placeholder="Zusatzinfos wie 'Einlass ab 18:30 Uhr' oder ähnliches..."
+                value={eventDescription}
+                onChange={(e) => setEventDescription(e.target.value)}
+                style={{ width: '100%', minHeight: '60px', borderRadius: '6px', border: '1px solid #e5e7eb', padding: '0.5rem', backgroundColor: '#090514', color: '#fff' }}
+              />
+            </div>
+
+            <button type="submit" className={styles.createButton} style={{ backgroundColor: '#10b981' }}>
+              <Calendar size={18} className={styles.mr2} />
+              Termin anlegen
+            </button>
+          </form>
+        </section>
+
+        {/* Right: Events list */}
+        <section className={`${styles.card} glass`}>
+          <div className={styles.cardHeader}>
+            <h2>Geplante Veranstaltungen</h2>
+          </div>
+
+          {events.length === 0 ? (
+            <div className={styles.emptyState}>
+              <Calendar size={48} className={styles.textMuted} />
+              <p>Keine Veranstaltungen geplant.</p>
+              <p className={styles.hint}>Erstellen Sie links einen Termin und weisen Sie einen Saalplan zu.</p>
+            </div>
+          ) : (
+            <div className={styles.tableContainer}>
+              <table className={styles.table}>
+                <thead>
+                  <tr>
+                    <th>Vorstellung</th>
+                    <th>Termin</th>
+                    <th>Saalplan</th>
+                    <th>Aktionen</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {events.map((event) => (
+                    <tr key={event.id}>
+                      <td className={styles.codeCell}>{event.title}</td>
+                      <td style={{fontSize: '0.85rem'}}>{formatEventDate(event.date)}</td>
+                      <td>
+                        <span className={styles.discountBadge} style={{ backgroundColor: '#4f46e5' }}>
+                          {event.layout?.name || 'Unbekannt'}
+                        </span>
+                      </td>
+                      <td>
+                        <button
+                          onClick={() => handleDeleteEvent(event.id, event.title)}
+                          className={styles.deleteButton}
+                          title="Löschen"
+                        >
+                          <Trash2 size={16} />
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </section>
+      </div>
+
+      {/* Row 2: Promo Codes Section */}
       <div className={styles.grid}>
+        
         {/* Left column: Create new code */}
         <section className={`${styles.card} glass`}>
           <div className={styles.cardHeader}>
-            <h2>Code erstellen</h2>
+            <h2>Rabattcode erstellen</h2>
           </div>
 
           {formError && <div className={styles.errorAlert}>{formError}</div>}

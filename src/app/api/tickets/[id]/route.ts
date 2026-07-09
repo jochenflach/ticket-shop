@@ -17,6 +17,7 @@ export async function GET(
       include: {
         seat: true,
         order: true,
+        event: true,
       },
     });
 

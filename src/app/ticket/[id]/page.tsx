@@ -20,6 +20,13 @@ interface Order {
   customerEmail: string;
 }
 
+interface Event {
+  id: string;
+  title: string;
+  date: string;
+  description: string | null;
+}
+
 interface TicketData {
   id: string;
   ticketCode: string;
@@ -28,7 +35,24 @@ interface TicketData {
   pricePaid: number;
   seat: Seat;
   order: Order;
+  event: Event;
 }
+
+const formatDate = (dateString: string) => {
+  try {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('de-DE', {
+      weekday: 'long',
+      day: '2-digit',
+      month: 'long',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    }) + ' Uhr';
+  } catch (e) {
+    return dateString;
+  }
+};
 
 export default function TicketPrintPage() {
   const params = useParams();
@@ -117,7 +141,7 @@ export default function TicketPrintPage() {
                 <div className={styles.verticalBrand}>EINTRITTSKARTE</div>
                 <div className={styles.brandTitle}>
                   <span className={styles.musicalSub}>Musical</span>
-                  <h1 className={styles.musicalName}>Das Wilde Weib</h1>
+                  <h1 className={styles.musicalName}>{ticket.event.title}</h1>
                 </div>
               </div>
 
@@ -127,7 +151,7 @@ export default function TicketPrintPage() {
                     <span className={styles.label}>Datum & Uhrzeit</span>
                     <span className={styles.value}>
                       <Calendar size={14} className={styles.inlineIcon} />
-                      24. & 25. Oktober 2026, 20:00 Uhr
+                      {formatDate(ticket.event.date)}
                     </span>
                   </div>
                   <div className={styles.detailItem}>

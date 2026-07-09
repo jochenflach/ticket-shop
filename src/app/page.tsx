@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useRef, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { Calendar, MapPin, Ticket, CreditCard, Loader2, Sparkles, ShieldCheck, Timer } from 'lucide-react';
+import { Calendar, MapPin, Ticket, CreditCard, Loader2, Sparkles, ShieldCheck, Timer, Clock, ChevronRight, ArrowLeft } from 'lucide-react';
 import styles from './page.module.css';
 
 // Type definitions
@@ -42,12 +42,17 @@ function TicketShopContent() {
   const [promoError, setPromoError] = useState<string | null>(null);
   const [promoLoading, setPromoLoading] = useState(false);
 
+  // Multi-Event States
+  const [events, setEvents] = useState<any[]>([]);
+  const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
+  const [selectedEvent, setSelectedEvent] = useState<any | null>(null);
+  const [eventsLoading, setEventsLoading] = useState(true);
+
   const prevLengthRef = useRef(0);
   const pollingRef = useRef<NodeJS.Timeout | null>(null);
 
   // Initialize Session ID
   useEffect(() => {
-    // Check if session ID exists in localStorage, otherwise create new one
     let storedSessionId = localStorage.getItem('musical_shop_session_id');
     if (!storedSessionId) {
       storedSessionId = 'sess_' + Math.random().toString(36).substring(2, 15);
@@ -56,12 +61,40 @@ function TicketShopContent() {
     setSessionId(storedSessionId);
   }, []);
 
-  // Fetch seats data
+  // Fetch all events on load
+  useEffect(() => {
+    const fetchEvents = async () => {
+      try {
+        const response = await fetch('/api/events');
+        const data = await response.json();
+        if (response.ok && data.events) {
+          setEvents(data.events);
+          
+          // Check if URL has eventId
+          const urlEventId = searchParams.get('eventId');
+          if (urlEventId) {
+            const matched = data.events.find((e: any) => e.id === urlEventId);
+            if (matched) {
+              setSelectedEventId(matched.id);
+              setSelectedEvent(matched);
+            }
+          }
+        }
+      } catch (err) {
+        console.error('Error loading events:', err);
+      } finally {
+        setEventsLoading(false);
+      }
+    };
+    fetchEvents();
+  }, [searchParams]);
+
+  // Fetch seats data for the selected event
   const fetchSeats = async (showLoading = false) => {
-    if (!sessionId) return;
+    if (!sessionId || !selectedEventId) return;
     if (showLoading) setLoading(true);
     try {
-      const response = await fetch('/api/seats', {
+      const response = await fetch(`/api/seats?eventId=${selectedEventId}`, {
         headers: {
           'x-session-id': sessionId,
         },
@@ -105,21 +138,21 @@ function TicketShopContent() {
     }
   };
 
-  // Poll for seat status updates
+  // Poll for seat status updates (re-binds when event changes)
   useEffect(() => {
-    if (sessionId) {
+    if (sessionId && selectedEventId) {
       fetchSeats(true);
       
-      // Poll every 5 seconds for real-time multi-location updates
+      // Poll every 8 seconds for real-time multi-location updates
       pollingRef.current = setInterval(() => {
         fetchSeats(false);
-      }, 5000);
+      }, 8000);
     }
 
     return () => {
       if (pollingRef.current) clearInterval(pollingRef.current);
     };
-  }, [sessionId]);
+  }, [sessionId, selectedEventId]);
 
   // Handle timer expiration
   const handleTimerExpiry = async () => {
@@ -132,7 +165,7 @@ function TicketShopContent() {
     sessionStorage.removeItem('musical_shop_timer_expiry');
     setTimeLeft(null);
 
-    if (sessionId && expiredSeats.length > 0) {
+    if (sessionId && expiredSeats.length > 0 && selectedEventId) {
       try {
         await fetch('/api/seats/lock', {
           method: 'POST',
@@ -143,6 +176,7 @@ function TicketShopContent() {
           body: JSON.stringify({
             action: 'unlock',
             seatIds: expiredSeats,
+            eventId: selectedEventId,
           }),
         });
       } catch (err) {
@@ -273,6 +307,7 @@ function TicketShopContent() {
         body: JSON.stringify({
           action,
           seatIds: [seat.id],
+          eventId: selectedEventId,
         }),
       });
 
@@ -325,6 +360,7 @@ function TicketShopContent() {
           source: 'CUSTOMER',
           promoCode: appliedPromo?.code || null,
           ticketTypes,
+          eventId: selectedEventId,
         }),
       });
 
@@ -373,6 +409,122 @@ function TicketShopContent() {
     rows[seat.row].push(seat);
   });
 
+  // ==========================================
+  // VIEW: Event Selection Page
+  // ==========================================
+  if (!selectedEventId) {
+    return (
+      <main className={`${styles.main} ${isEmbedded ? styles.embeddedMain : ''}`}>
+        {!isEmbedded && <div className={styles.glowingBackground}></div>}
+        
+        <header className={styles.header}>
+          <div className={styles.badge}>
+            <Sparkles size={14} className={styles.goldText} />
+            <span>Musical-Highlight 2026</span>
+          </div>
+          <h1 className={styles.title}>DAS WILDE WEIB</h1>
+          <p className={styles.subtitle}>Ein fesselndes Drama aus der Region über Freiheit, Liebe und Rebellion</p>
+        </header>
+
+        {eventsLoading ? (
+          <div className={styles.loadingOverlay} style={{ minHeight: '300px' }}>
+            <Loader2 size={40} className={styles.spinner} />
+            <p>Lade Vorstellungen...</p>
+          </div>
+        ) : events.length === 0 ? (
+          <div className={styles.emptyState} style={{ maxWidth: '600px', margin: '3rem auto', padding: '3rem', background: 'rgba(9, 5, 20, 0.6)', border: '1px solid #33275b', borderRadius: '12px', textAlign: 'center' }}>
+            <Calendar size={48} style={{ color: '#d97706', marginBottom: '1rem' }} />
+            <h2>Keine Vorstellungen geplant</h2>
+            <p style={{ color: '#9ca3af', fontSize: '0.95rem' }}>Aktuell sind keine Spieltermine im System eingetragen. Bitte versuchen Sie es später noch einmal.</p>
+          </div>
+        ) : (
+          <div style={{ maxWidth: '900px', margin: '2rem auto', padding: '0 1rem' }}>
+            <h2 style={{ textAlign: 'center', color: '#fff', marginBottom: '2.5rem', fontSize: '1.6rem', fontWeight: 600 }}>Bitte wählen Sie einen Termin aus:</h2>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.5rem' }}>
+              {events.map(ev => {
+                const dateObj = new Date(ev.date);
+                const dayStr = dateObj.toLocaleDateString('de-DE', { weekday: 'long', day: '2-digit', month: 'long', year: 'numeric' });
+                const timeStr = dateObj.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' }) + ' Uhr';
+                
+                return (
+                  <div
+                    key={ev.id}
+                    className="glass"
+                    style={{
+                      border: '1px solid #33275b',
+                      borderRadius: '12px',
+                      padding: '1.75rem',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      justifyContent: 'space-between',
+                      background: 'rgba(15, 8, 30, 0.45)',
+                      transition: 'all 0.3s ease',
+                      position: 'relative',
+                      overflow: 'hidden'
+                    }}
+                  >
+                    <div>
+                      <h3 style={{ color: '#fbbf24', fontSize: '1.25rem', marginBottom: '1rem', fontWeight: 700 }}>{ev.title}</h3>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', color: '#e5e7eb', fontSize: '0.9rem', marginBottom: '1.5rem' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                          <Calendar size={15} style={{ color: '#fbbf24' }} />
+                          <span>{dayStr}</span>
+                        </div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                          <Clock size={15} style={{ color: '#fbbf24' }} />
+                          <span>{timeStr}</span>
+                        </div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                          <MapPin size={15} style={{ color: '#fbbf24' }} />
+                          <span>Stadthalle Wildeshausen</span>
+                        </div>
+                      </div>
+                      {ev.description && (
+                        <p style={{ color: '#9ca3af', fontSize: '0.85rem', lineHeight: '1.4', marginBottom: '1.5rem' }}>
+                          {ev.description}
+                        </p>
+                      )}
+                    </div>
+                    <button
+                      onClick={() => {
+                        setSelectedEventId(ev.id);
+                        setSelectedEvent(ev);
+                        const url = new URL(window.location.href);
+                        url.searchParams.set('eventId', ev.id);
+                        window.history.replaceState({}, '', url.toString());
+                      }}
+                      className={styles.checkoutButton}
+                      style={{
+                        width: '100%',
+                        backgroundColor: '#fbbf24',
+                        color: '#090514',
+                        fontWeight: 700,
+                        border: 'none',
+                        padding: '0.75rem',
+                        borderRadius: '6px',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '0.5rem',
+                        transition: 'transform 0.2s ease',
+                        marginTop: 'auto'
+                      }}
+                    >
+                      <Ticket size={16} />
+                      Sitzplätze wählen
+                      <ChevronRight size={16} />
+                    </button>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+      </main>
+    );
+  }
+
   return (
     <main className={`${styles.main} ${isEmbedded ? styles.embeddedMain : ''}`}>
       {/* Floating Timer at Top Left */}
@@ -396,34 +548,76 @@ function TicketShopContent() {
             <Sparkles size={14} className={styles.goldText} />
             <span>Musical-Highlight 2026</span>
           </div>
-          <h1 className={styles.title}>DAS WILDE WEIB</h1>
+          <h1 className={styles.title}>{selectedEvent?.title ?? 'DAS WILDE WEIB'}</h1>
           <p className={styles.subtitle}>Ein fesselndes Drama aus der Region über Freiheit, Liebe und Rebellion</p>
-        
-        <div className={styles.infoRow}>
-          <div className={styles.infoCard}>
-            <Calendar size={18} className={styles.purpleText} />
-            <div>
-              <h3>Termine</h3>
-              <p>24. & 25. Oktober 2026</p>
+          
+          <div className={styles.infoRow}>
+            <div className={styles.infoCard}>
+              <Calendar size={18} className={styles.purpleText} />
+              <div>
+                <h3>Vorstellung</h3>
+                <p>
+                  {selectedEvent ? new Date(selectedEvent.date).toLocaleDateString('de-DE', {
+                    weekday: 'short',
+                    day: '2-digit',
+                    month: 'short',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                  }) + ' Uhr' : 'Spieltermin'}
+                </p>
+              </div>
+            </div>
+            <div className={styles.infoCard}>
+              <MapPin size={18} className={styles.purpleText} />
+              <div>
+                <h3>Spielort</h3>
+                <p>Stadthalle Wildeshausen</p>
+              </div>
+            </div>
+            <div className={styles.infoCard}>
+              <Ticket size={18} className={styles.purpleText} />
+              <div>
+                <h3>Preise</h3>
+                <p>Ab 24,00 €</p>
+              </div>
             </div>
           </div>
-          <div className={styles.infoCard}>
-            <MapPin size={18} className={styles.purpleText} />
-            <div>
-              <h3>Spielort</h3>
-              <p>Stadthalle Wildeshausen</p>
-            </div>
-          </div>
-          <div className={styles.infoCard}>
-            <Ticket size={18} className={styles.purpleText} />
-            <div>
-              <h3>Preise</h3>
-              <p>Ab 29,00 €</p>
-          </div>
+        </header>
+      )}
+
+      {/* Back Button to switch shows */}
+      {!isEmbedded && (
+        <div style={{ maxWidth: '1200px', margin: '0 auto 1.5rem auto', padding: '0 1rem' }}>
+          <button
+            onClick={() => {
+              setSelectedEventId(null);
+              setSelectedEvent(null);
+              setSelectedSeatIds([]);
+              setTicketTypes({});
+              const url = new URL(window.location.href);
+              url.searchParams.delete('eventId');
+              window.history.replaceState({}, '', url.toString());
+            }}
+            className={styles.backButton}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '0.5rem',
+              border: '1px solid #33275b',
+              backgroundColor: 'rgba(9, 5, 20, 0.6)',
+              color: '#fff',
+              padding: '0.5rem 1rem',
+              borderRadius: '6px',
+              cursor: 'pointer',
+              fontWeight: 600,
+              transition: 'all 0.2s ease',
+              fontSize: '0.85rem'
+            }}
+          >
+            <ArrowLeft size={14} /> Vorstellung wechseln
+          </button>
         </div>
-      </div>
-    </header>
-  )}
+      )}
 
       {/* Main Content Grid */}
       <div className={styles.grid}>

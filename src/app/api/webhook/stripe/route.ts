@@ -51,10 +51,11 @@ export async function POST(request: Request) {
     const session = event.data.object as Stripe.Checkout.Session;
     const metadata = session.metadata;
 
-    if (metadata && metadata.orderId && metadata.seatIds) {
+    if (metadata && metadata.orderId && metadata.seatIds && metadata.eventId) {
       const orderId = metadata.orderId;
       const seatIds: string[] = JSON.parse(metadata.seatIds);
       const ticketTypes = metadata.ticketTypes ? JSON.parse(metadata.ticketTypes) : {};
+      const eventId = metadata.eventId;
 
       try {
         await prisma.$transaction(async (tx) => {
@@ -91,11 +92,12 @@ export async function POST(request: Request) {
 
           // 2. Generate tickets
           for (const seat of seats) {
-            // Check if ticket already exists for safety
+            // Check if ticket already exists for safety for this event
             const existingTicket = await tx.ticket.findFirst({
               where: {
                 order: { status: 'PAID' },
                 seatId: seat.id,
+                eventId: eventId,
               },
             });
             if (existingTicket) {
@@ -109,6 +111,7 @@ export async function POST(request: Request) {
               data: {
                 orderId,
                 seatId: seat.id,
+                eventId: eventId,
                 ticketType: type,
                 pricePaid,
                 ticketCode: generateTicketCode(),
@@ -116,10 +119,11 @@ export async function POST(request: Request) {
             });
           }
 
-          // 3. Clear temporary seat locks
+          // 3. Clear temporary seat locks for this event
           await tx.seatLock.deleteMany({
             where: {
               seatId: { in: seatIds },
+              eventId: eventId,
             },
           });
 

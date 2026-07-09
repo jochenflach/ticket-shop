@@ -38,7 +38,26 @@ export default function SellerPOS() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Multi-Event States
+  const [events, setEvents] = useState<any[]>([]);
+  const [selectedEventId, setSelectedEventId] = useState<string>('');
+
   const pollingRef = useRef<NodeJS.Timeout | null>(null);
+
+  const fetchEvents = async () => {
+    try {
+      const response = await fetch('/api/events');
+      const data = await response.json();
+      if (response.ok && data.events) {
+        setEvents(data.events);
+        if (data.events.length > 0 && !selectedEventId) {
+          setSelectedEventId(data.events[0].id);
+        }
+      }
+    } catch (err) {
+      console.error('Error fetching events in POS:', err);
+    }
+  };
 
   // Initialize Session
   useEffect(() => {
@@ -46,6 +65,7 @@ export default function SellerPOS() {
     const storedPin = sessionStorage.getItem('seller_pos_pin');
     if (storedPin === '1234') {
       setIsLoggedIn(true);
+      fetchEvents();
     }
 
     let storedSessionId = localStorage.getItem('seller_pos_session_id');
@@ -56,12 +76,12 @@ export default function SellerPOS() {
     setSessionId(storedSessionId);
   }, []);
 
-  // Fetch seats data
+  // Fetch seats data for the selected event
   const fetchSeats = async (showLoading = false) => {
-    if (!sessionId) return;
+    if (!sessionId || !selectedEventId) return;
     if (showLoading) setLoading(true);
     try {
-      const response = await fetch('/api/seats', {
+      const response = await fetch(`/api/seats?eventId=${selectedEventId}`, {
         headers: {
           'x-session-id': sessionId,
         },
@@ -104,9 +124,9 @@ export default function SellerPOS() {
     }
   };
 
-  // Poll for seat changes
+  // Poll for seat changes (re-binds when event changes)
   useEffect(() => {
-    if (isLoggedIn && sessionId) {
+    if (isLoggedIn && sessionId && selectedEventId) {
       fetchSeats(true);
 
       pollingRef.current = setInterval(() => {
@@ -117,7 +137,7 @@ export default function SellerPOS() {
     return () => {
       if (pollingRef.current) clearInterval(pollingRef.current);
     };
-  }, [isLoggedIn, sessionId]);
+  }, [isLoggedIn, sessionId, selectedEventId]);
 
   // PIN login handler
   const handlePinSubmit = (e: React.FormEvent) => {
@@ -126,6 +146,7 @@ export default function SellerPOS() {
       setIsLoggedIn(true);
       sessionStorage.setItem('seller_pos_pin', pinInput);
       setPinError(null);
+      fetchEvents();
     } else {
       setPinError('Falsche Verkäufer-PIN. Bitte erneut versuchen.');
       setPinInput('');
@@ -141,7 +162,7 @@ export default function SellerPOS() {
 
   // Seat toggle handler
   const handleSeatClick = async (seat: Seat) => {
-    if (submitting) return;
+    if (submitting || !selectedEventId) return;
 
     const isSelected = selectedSeatIds.includes(seat.id);
     const action = isSelected ? 'unlock' : 'lock';
@@ -158,6 +179,7 @@ export default function SellerPOS() {
         body: JSON.stringify({
           action,
           seatIds: [seat.id],
+          eventId: selectedEventId,
         }),
       });
 
@@ -190,7 +212,7 @@ export default function SellerPOS() {
   // POS Checkout submission handler
   const handlePOSCheckout = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (selectedSeatIds.length === 0 || submitting) return;
+    if (selectedSeatIds.length === 0 || submitting || !selectedEventId) return;
 
     setSubmitting(true);
     setError(null);
@@ -212,12 +234,13 @@ export default function SellerPOS() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          customerName,
-          customerEmail,
+          customerName: customerName || 'Abendkasse Käufer',
+          customerEmail: customerEmail || 'abendkasse@wildes-weib.de',
           seatIds: selectedSeatIds,
           source: 'SELLER',
           sellerPin: pin,
           ticketTypes: finalTicketTypes,
+          eventId: selectedEventId,
         }),
       });
 
@@ -315,9 +338,39 @@ export default function SellerPOS() {
       <div className={styles.grid}>
         {/* Left: Seat plan */}
         <section className={`${styles.card} glass`}>
-          <div className={styles.cardHeader}>
-            <h2>Sitzplatzauswahl (Direktbuchung)</h2>
-            <p>Plätze im Plan auswählen. Als Verkäufer buchen Sie Plätze direkt und ohne Zahlungsdienstleister.</p>
+          <div className={styles.cardHeader} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
+            <div>
+              <h2>Sitzplatzauswahl (Direktbuchung)</h2>
+              <p>Plätze im Plan auswählen. Als Verkäufer buchen Sie Plätze direkt und ohne Zahlungsdienstleister.</p>
+            </div>
+            {events.length > 0 && (
+              <div className={styles.eventSelectorWrapper} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', backgroundColor: '#090514', padding: '0.4rem 0.8rem', borderRadius: '6px', border: '1px solid #33275b' }}>
+                <Calendar size={15} style={{ color: '#fbbf24' }} />
+                <select
+                  value={selectedEventId}
+                  onChange={(e) => {
+                    setSelectedEventId(e.target.value);
+                    setSelectedSeatIds([]);
+                    setTicketTypes({});
+                  }}
+                  style={{ backgroundColor: 'transparent', color: '#fff', border: 'none', fontSize: '0.85rem', fontWeight: 600, cursor: 'pointer', outline: 'none' }}
+                >
+                  {events.map(ev => {
+                    const formatted = new Date(ev.date).toLocaleDateString('de-DE', {
+                      day: '2-digit',
+                      month: '2-digit',
+                      hour: '2-digit',
+                      minute: '2-digit'
+                    }) + ' Uhr';
+                    return (
+                      <option key={ev.id} value={ev.id} style={{ backgroundColor: '#090514', color: '#fff' }}>
+                        {ev.title} ({formatted})
+                      </option>
+                    );
+                  })}
+                </select>
+              </div>
+            )}
           </div>
 
           {/* Seat Map Legend */}
