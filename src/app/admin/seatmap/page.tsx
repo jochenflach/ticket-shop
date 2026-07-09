@@ -185,8 +185,8 @@ export default function SeatmapEditor() {
     let newY = coords.y - dragOffset.y;
 
     if (snapToGrid) {
-      newX = Math.round(newX / 25) * 25;
-      newY = Math.round(newY / 25) * 25;
+      newX = Math.round(newX / 12.5) * 12.5;
+      newY = Math.round(newY / 12.5) * 12.5;
     }
 
     newX = Math.max(10, Math.min(1000 - 100, newX));
