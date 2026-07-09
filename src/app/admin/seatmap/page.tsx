@@ -12,7 +12,8 @@ import {
   Info,
   ChevronRight,
   FolderOpen,
-  Copy
+  Copy,
+  AlertTriangle
 } from 'lucide-react';
 import styles from './seatmap.module.css';
 
@@ -101,6 +102,32 @@ export default function SeatmapEditor() {
   const [editorSuccess, setEditorSuccess] = useState<string | null>(null);
 
   const svgRef = useRef<SVGSVGElement>(null);
+
+  // Custom Modal State
+  const [modalConfig, setModalConfig] = useState<{
+    isOpen: boolean;
+    title: string;
+    message: string;
+    type: 'alert' | 'confirm';
+    onConfirm?: () => void;
+    onCancel?: () => void;
+  } | null>(null);
+
+  const showModal = (title: string, message: string, type: 'alert' | 'confirm', onConfirm?: () => void) => {
+    setModalConfig({
+      isOpen: true,
+      title,
+      message,
+      type,
+      onConfirm: () => {
+        if (onConfirm) onConfirm();
+        setModalConfig(null);
+      },
+      onCancel: () => {
+        setModalConfig(null);
+      }
+    });
+  };
 
   // Load PIN and layouts
   useEffect(() => {
@@ -353,37 +380,42 @@ export default function SeatmapEditor() {
   const handleDeleteLayout = async () => {
     if (!selectedLayoutId) return;
     if (selectedLayoutId === 'default-layout') {
-      alert('Das Standard-Layout kann nicht gelöscht werden.');
+      showModal(
+        'Aktion gesperrt',
+        'Das Standard-Layout kann nicht gelöscht werden.',
+        'alert'
+      );
       return;
     }
 
-    const confirmDelete = window.confirm(
-      `Möchten Sie den Saalplan "${layoutName}" wirklich unwiderruflich aus der Datenbank löschen?\n` +
-      'Dies schlägt fehl, wenn dieser Saalplan noch Veranstaltungen zugeordnet ist.'
-    );
-    if (!confirmDelete) return;
+    showModal(
+      'Saalplan löschen',
+      `Möchten Sie das Saalplan-Layout "${layoutName}" wirklich unwiderruflich löschen? Alle zugeordneten physischen Sitzplätze werden ebenfalls gelöscht.`,
+      'confirm',
+      async () => {
+        try {
+          const adminPin = sessionStorage.getItem('admin_session_pin') || '';
+          const response = await fetch(`/api/admin/seatmap/layouts?id=${selectedLayoutId}`, {
+            method: 'DELETE',
+            headers: {
+              'x-admin-pin': adminPin,
+            },
+          });
 
-    try {
-      const adminPin = sessionStorage.getItem('admin_session_pin') || '';
-      const response = await fetch(`/api/admin/seatmap/layouts?id=${selectedLayoutId}`, {
-        method: 'DELETE',
-        headers: {
-          'x-admin-pin': adminPin,
-        },
-      });
-
-      const data = await response.json();
-      if (response.ok) {
-        setEditorSuccess('Saalplan erfolgreich gelöscht.');
-        await fetchLayouts();
-        handleLoadLayout('');
-      } else {
-        setEditorError(data.error || 'Fehler beim Löschen des Saalplans.');
+          const data = await response.json();
+          if (response.ok) {
+            setEditorSuccess('Saalplan erfolgreich gelöscht.');
+            await fetchLayouts();
+            handleLoadLayout('');
+          } else {
+            setEditorError(data.error || 'Fehler beim Löschen des Saalplans.');
+          }
+        } catch (err: any) {
+          console.error(err);
+          setEditorError('Verbindungsfehler beim Löschen: ' + err.message);
+        }
       }
-    } catch (err: any) {
-      console.error(err);
-      setEditorError('Verbindungsfehler beim Löschen: ' + err.message);
-    }
+    );
   };
 
   // Save layout template (and generate seats)
@@ -396,65 +428,63 @@ export default function SeatmapEditor() {
       return;
     }
 
-    const confirmSave = window.confirm(
-      'Möchten Sie diesen Saalplan speichern?\n' +
-      'Wenn Sie einen bestehenden Saalplan überschreiben, der mit Veranstaltungen verknüpft ist, darf dafür noch kein Ticket verkauft worden sein.'
-    );
-    if (!confirmSave) return;
+    showModal(
+      'Saalplan speichern',
+      'Möchten Sie diesen Saalplan speichern? Wenn Sie einen bestehenden Saalplan überschreiben, der mit Veranstaltungen verknüpft ist, darf dafür noch kein Ticket verkauft worden sein.',
+      'confirm',
+      async () => {
+        // Convert block model into single Seat list
+        const seatsToSave: any[] = [];
+        let globalRowOffset = 0;
 
-    // Convert block model into single Seat list
-    const seatsToSave: any[] = [];
-    let globalRowOffset = 0;
-
-    for (const block of blocks) {
-      const blockSeats = getSeatsInBlock(block);
-      blockSeats.forEach(s => {
-        seatsToSave.push({
-          // The database layoutId prefix will be added securely on the server!
-          id: `${block.id}-R${s.row}-S${s.number}`,
-          row: globalRowOffset + s.row,
-          number: s.number,
-          category: s.category,
-          price: s.price,
-          x: Math.round(s.x * 100) / 100,
-          y: Math.round(s.y * 100) / 100,
-        });
-      });
-      globalRowOffset += block.rows;
-    }
-
-    try {
-      const adminPin = sessionStorage.getItem('admin_session_pin') || '';
-      const response = await fetch('/api/admin/seatmap/layouts', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-admin-pin': adminPin,
-        },
-        body: JSON.stringify({
-          id: selectedLayoutId,
-          name: layoutName,
-          blocks: blocks,
-          seats: seatsToSave
-        }),
-      });
-
-      const data = await response.json();
-      if (response.ok) {
-        setEditorSuccess(data.message || 'Saalplan erfolgreich gespeichert!');
-        
-        // Refresh layout list and select the newly created/saved layout ID
-        await fetchLayouts();
-        if (data.layoutId) {
-          setSelectedLayoutId(data.layoutId);
+        for (const block of blocks) {
+          const blockSeats = getSeatsInBlock(block);
+          blockSeats.forEach(s => {
+            seatsToSave.push({
+              id: `${block.id}-R${s.row}-S${s.number}`,
+              row: globalRowOffset + s.row,
+              number: s.number,
+              category: s.category,
+              price: s.price,
+              x: Math.round(s.x * 100) / 100,
+              y: Math.round(s.y * 100) / 100,
+            });
+          });
+          globalRowOffset += block.rows;
         }
-      } else {
-        setEditorError(data.error || 'Fehler beim Speichern des Saalplans.');
+
+        try {
+          const adminPin = sessionStorage.getItem('admin_session_pin') || '';
+          const response = await fetch('/api/admin/seatmap/layouts', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'x-admin-pin': adminPin,
+            },
+            body: JSON.stringify({
+              id: selectedLayoutId,
+              name: layoutName,
+              blocks: blocks,
+              seats: seatsToSave
+            }),
+          });
+
+          const data = await response.json();
+          if (response.ok) {
+            setEditorSuccess(data.message || 'Saalplan erfolgreich gespeichert!');
+            await fetchLayouts();
+            if (data.layoutId) {
+              setSelectedLayoutId(data.layoutId);
+            }
+          } else {
+            setEditorError(data.error || 'Fehler beim Speichern des Saalplans.');
+          }
+        } catch (err: any) {
+          console.error(err);
+          setEditorError('Serverfehler beim Speichern des Saalplans: ' + err.message);
+        }
       }
-    } catch (err: any) {
-      console.error(err);
-      setEditorError('Serverfehler beim Speichern des Saalplans: ' + err.message);
-    }
+    );
   };
 
   const selectedBlock = blocks.find(b => b.id === selectedBlockId);
@@ -820,6 +850,94 @@ export default function SeatmapEditor() {
         </section>
 
       </div>
+
+      {/* Custom Alert/Confirm Modal */}
+      {modalConfig && modalConfig.isOpen && (
+        <div 
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: 'rgba(5, 3, 10, 0.75)',
+            backdropFilter: 'blur(6px)',
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            zIndex: 9999,
+            padding: '1rem'
+          }}
+        >
+          <div 
+            className="glass"
+            style={{
+              width: '100%',
+              maxWidth: '480px',
+              backgroundColor: '#0f081e',
+              border: '1px solid #33275b',
+              borderRadius: '12px',
+              padding: '2rem',
+              boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.6), 0 0 20px rgba(124, 58, 237, 0.15)',
+              position: 'relative'
+            }}
+          >
+            <h3 style={{ color: '#fff', fontSize: '1.25rem', fontWeight: 700, marginBottom: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.5rem', fontFamily: 'inherit' }}>
+              {modalConfig.type === 'confirm' ? (
+                <Info size={20} style={{ color: '#fbbf24' }} />
+              ) : (
+                <AlertTriangle size={20} style={{ color: '#ef4444' }} />
+              )}
+              {modalConfig.title}
+            </h3>
+            <p style={{ color: '#9ca3af', fontSize: '0.9rem', lineHeight: '1.5', marginBottom: '1.75rem', fontFamily: 'inherit' }}>
+              {modalConfig.message}
+            </p>
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem' }}>
+              {modalConfig.type === 'confirm' && (
+                <button
+                  onClick={modalConfig.onCancel}
+                  style={{
+                    backgroundColor: 'transparent',
+                    border: '1px solid #33275b',
+                    color: '#e5e7eb',
+                    padding: '0.55rem 1.25rem',
+                    borderRadius: '6px',
+                    fontWeight: 600,
+                    fontSize: '0.85rem',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s ease',
+                    fontFamily: 'inherit'
+                  }}
+                  onMouseOver={(e) => e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.05)'}
+                  onMouseOut={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                >
+                  Abbrechen
+                </button>
+              )}
+              <button
+                onClick={modalConfig.onConfirm}
+                style={{
+                  backgroundColor: modalConfig.type === 'confirm' ? '#fbbf24' : '#ef4444',
+                  color: modalConfig.type === 'confirm' ? '#090514' : '#fff',
+                  border: 'none',
+                  padding: '0.55rem 1.5rem',
+                  borderRadius: '6px',
+                  fontWeight: 700,
+                  fontSize: '0.85rem',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease',
+                  fontFamily: 'inherit'
+                }}
+                onMouseOver={(e) => e.currentTarget.style.transform = 'translateY(-1px)'}
+                onMouseOut={(e) => e.currentTarget.style.transform = 'none'}
+              >
+                {modalConfig.type === 'confirm' ? 'Bestätigen' : 'OK'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </main>
   );
 }
