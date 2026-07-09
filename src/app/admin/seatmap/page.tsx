@@ -37,6 +37,8 @@ interface GeneratedSeat {
 }
 
 export default function SeatmapEditor() {
+  const svgRef = useRef<SVGSVGElement>(null);
+
   // Authentication state
   const [pin, setPin] = useState('');
   const [isAuthorized, setIsAuthorized] = useState(false);
@@ -395,7 +397,6 @@ export default function SeatmapEditor() {
   // ==========================================
   // VIEW: Editor Page
   // ==========================================
-  const svgRef = useRef<SVGSVGElement>(null);
 
   return (
     <main className={styles.container}>
