@@ -10,26 +10,55 @@ datasource db {
   provider = "postgresql"
 }
 
+model Event {
+  id          String        @id @default(cuid())
+  title       String
+  date        DateTime
+  description String?
+  layoutId    String
+  layout      SeatmapLayout @relation(fields: [layoutId], references: [id])
+  locks       SeatLock[]
+  tickets     Ticket[]
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+}
+
+model SeatmapLayout {
+  id        String   @id @default(cuid())
+  name      String
+  blocks    String   // JSON string of Block[]
+  seats     Seat[]
+  events    Event[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
 model Seat {
-  id        String     @id // e.g. "Reihe-1-Sitz-1"
-  row       Int        // 1 to 16
-  number    Int        // 1 to 20
-  category  String     // 'PREMIUM', 'KAT1', 'KAT2'
+  id        String        @id // z.B. "layoutid-A-R1-S1"
+  layoutId  String
+  layout    SeatmapLayout @relation(fields: [layoutId], references: [id], onDelete: Cascade)
+  row       Int
+  number    Int
+  category  String
   price     Float
-  x         Float      @default(0)
-  y         Float      @default(0)
+  x         Float
+  y         Float
   locks     SeatLock[]
   tickets   Ticket[]
-  createdAt DateTime   @default(now())
-  updatedAt DateTime   @updatedAt
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
 }
 
 model SeatLock {
   id        String   @id @default(cuid())
-  seatId    String   @unique
+  seatId    String
   seat      Seat     @relation(fields: [seatId], references: [id], onDelete: Cascade)
+  eventId   String
+  event     Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
   lockedAt  DateTime @default(now())
   lockedBy  String   // Session ID or Seller PIN/ID
+
+  @@unique([seatId, eventId])
 }
 
 model Order {
@@ -54,12 +83,17 @@ model Ticket {
   order       Order     @relation(fields: [orderId], references: [id], onDelete: Cascade)
   seatId      String
   seat        Seat      @relation(fields: [seatId], references: [id])
+  eventId     String
+  event       Event     @relation(fields: [eventId], references: [id], onDelete: Cascade)
   ticketType  String    @default("NORMAL") // 'NORMAL', 'STUDENT', 'CHILD', 'FREE'
   pricePaid   Float     @default(0.0)      // Actual price paid after discounts/reductions
   ticketCode  String    @unique // Code for scanning (e.g. random token)
   checkedIn   Boolean   @default(false)
   checkedInAt DateTime?
   createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@unique([seatId, eventId])
 }
 
 model PromoCode {

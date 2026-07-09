@@ -19,12 +19,50 @@ if (dbUrl.startsWith('postgresql://') || dbUrl.startsWith('postgres://')) {
 }
 
 async function main() {
-  console.log("Seeding seats in database...");
-
-  // Clear existing seats
+  console.log("Cleaning database...");
+  await prisma.ticket.deleteMany({});
+  await prisma.seatLock.deleteMany({});
+  await prisma.event.deleteMany({});
   await prisma.seat.deleteMany({});
-  console.log('Deleted existing seats.');
+  await prisma.seatmapLayout.deleteMany({});
+  console.log("Database cleaned.");
 
+  const layoutId = 'default-layout';
+  const defaultBlocks = [
+    {
+      id: 'A',
+      rowPrefix: 'A',
+      rows: 6,
+      seatsPerRow: 20,
+      startX: 40,
+      startY: 106,
+      category: 'KAT1',
+      price: 40.0,
+      curvature: -0.18,
+    },
+    {
+      id: 'B',
+      rowPrefix: 'B',
+      rows: 10,
+      seatsPerRow: 20,
+      startX: 40,
+      startY: 282,
+      category: 'KAT2',
+      price: 24.0,
+      curvature: 0,
+    }
+  ];
+
+  console.log("Seeding default layout...");
+  await prisma.seatmapLayout.create({
+    data: {
+      id: layoutId,
+      name: "Musical Standard (320 Plätze)",
+      blocks: JSON.stringify(defaultBlocks),
+    }
+  });
+
+  console.log("Seeding seats associated with layout...");
   const seats = [];
 
   for (let row = 1; row <= 16; row++) {
@@ -37,7 +75,8 @@ async function main() {
         price = 40.0;
       }
 
-      const id = `R${row}-S${number}`;
+      // Prefix seat ID with layout ID for absolute uniqueness
+      const id = `${layoutId}-R${row}-S${number}`;
 
       // Calculate standard SVG coordinates matching the original layout
       const isRightSide = number > 10;
@@ -52,6 +91,7 @@ async function main() {
 
       seats.push({
         id,
+        layoutId,
         row,
         number,
         category,
@@ -62,14 +102,33 @@ async function main() {
     }
   }
 
-  // Create all seats
-  for (const seat of seats) {
-    await prisma.seat.create({
-      data: seat,
-    });
-  }
+  // Create all seats in bulk
+  await prisma.seat.createMany({
+    data: seats,
+  });
+  console.log(`Seeded ${seats.length} seats for the default layout.`);
 
-  console.log(`Successfully seeded ${seats.length} seats.`);
+  console.log("Seeding default events...");
+  await prisma.event.create({
+    data: {
+      id: 'event-samstag',
+      title: 'Das Wilde Weib - Samstagsshow',
+      date: new Date('2026-10-24T19:30:00Z'),
+      description: 'Samstagsaufführung in der Stadthalle. Einlass ab 18:30 Uhr, Beginn um 19:30 Uhr.',
+      layoutId: layoutId,
+    }
+  });
+
+  await prisma.event.create({
+    data: {
+      id: 'event-sonntag',
+      title: 'Das Wilde Weib - Sonntags-Matinée',
+      date: new Date('2026-10-25T14:30:00Z'),
+      description: 'Sonntagsaufführung in der Stadthalle. Einlass ab 13:30 Uhr, Beginn um 14:30 Uhr.',
+      layoutId: layoutId,
+    }
+  });
+  console.log("Seeded 2 default events successfully.");
 }
 
 main()
