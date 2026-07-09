@@ -8,7 +8,7 @@ echo ==========================================================
 echo           Ticketshop "Das Wilde Weib" - Manager
 echo ==========================================================
 echo.
-echo  Bitte wÃ¤hlen Sie eine Aktion aus:
+echo  Bitte wählen Sie eine Aktion aus:
 echo.
 echo  [1] Live-Daten herunterladen (Internet erforderlich)
 echo      - Holt alle Ticket-Buchungen aus der Supabase-Cloud.
@@ -56,7 +56,7 @@ for /f "tokens=2 delims=:" %%a in ('ipconfig ^| findstr "IPv4"') do (
 set localip=%localip: =%
 
 echo ==========================================================
-echo            TICKETSHOP OFFLINE SERVER GEÃ–FFNET
+echo            TICKETSHOP OFFLINE SERVER GEÖFFNET
 echo ==========================================================
 echo.
 echo  1. Stellen Sie sicher, dass Ihr Laptop im WLAN ist.
@@ -65,9 +65,9 @@ echo  3. Rufen Sie auf den Handys folgende Adresse im Browser auf:
 echo.
 echo     http://!localip!:3000/scan
 echo.
-echo  4. Das Kassen-Terminal (Seller) Ã¶ffnet sich gleich...
+echo  4. Das Kassen-Terminal (Seller) öffnet sich gleich...
 echo.
-echo  WICHTIG: SchlieÃŸen Sie dieses schwarze Fenster erst nach dem Einlass!
+echo  WICHTIG: Schließen Sie dieses schwarze Fenster erst nach dem Einlass!
 echo ==========================================================
 echo.
 echo Server wird gestartet... (Das kann 5-10 Sekunden dauern)
@@ -82,7 +82,7 @@ exit
 
 :invalid
 echo.
-echo UngÃ¼ltige Auswahl. Bitte wÃ¤hlen Sie 1 oder 2.
+echo Ungültige Auswahl. Bitte wählen Sie 1 oder 2.
 echo.
 pause
 exit
