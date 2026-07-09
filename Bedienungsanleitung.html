@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bedienungsanleitung - Ticketshop "Das Wilde Weib"</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #090514;
+      --primary-light: #1f1437;
+      --accent: #d97706;
+      --text: #1f2937;
+      --text-muted: #6b7280;
+      --bg: #f9fafb;
+      --card-bg: #ffffff;
+      --border: #e5e7eb;
+      --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      padding: 2rem 1rem;
+    }
+
+    .container {
+      max-width: 850px;
+      margin: 0 auto;
+      background: var(--card-bg);
+      padding: 3rem;
+      border-radius: 16px;
+      box-shadow: var(--shadow);
+      border: 1px solid var(--border);
+    }
+
+    header {
+      border-bottom: 2px solid var(--primary);
+      padding-bottom: 1.5rem;
+      margin-bottom: 2.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+    }
+
+    .header-title h1 {
+      font-size: 2.25rem;
+      font-weight: 800;
+      color: var(--primary);
+      letter-spacing: -0.02em;
+    }
+
+    .header-title p {
+      font-size: 1rem;
+      color: var(--text-muted);
+      margin-top: 0.25rem;
+    }
+
+    .header-meta {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      text-align: right;
+    }
+
+    h2 {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--primary);
+      margin-top: 2rem;
+      margin-bottom: 1rem;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 0.5rem;
+    }
+
+    h3 {
+      font-size: 1.15rem;
+      font-weight: 600;
+      color: var(--primary-light);
+      margin-top: 1.5rem;
+      margin-bottom: 0.5rem;
+    }
+
+    p {
+      margin-bottom: 1rem;
+    }
+
+    ul, ol {
+      margin-bottom: 1.5rem;
+      padding-left: 1.5rem;
+    }
+
+    li {
+      margin-bottom: 0.5rem;
+    }
+
+    code {
+      font-family: SFMono-Regular, Consolas, "Liberation Mono", Menlo, monospace;
+      background: #f3f4f6;
+      padding: 0.2rem 0.4rem;
+      border-radius: 4px;
+      font-size: 0.9rem;
+      color: #111827;
+      border: 1px solid #e5e7eb;
+    }
+
+    pre {
+      font-family: SFMono-Regular, Consolas, "Liberation Mono", Menlo, monospace;
+      background: #0f172a;
+      color: #f8fafc;
+      padding: 1.25rem;
+      border-radius: 8px;
+      overflow-x: auto;
+      margin-bottom: 1.5rem;
+      border: 1px solid #1e293b;
+      position: relative;
+    }
+
+    pre code {
+      background: transparent;
+      padding: 0;
+      border: none;
+      color: inherit;
+      font-size: 0.85rem;
+    }
+
+    .alert {
+      background-color: #fef3c7;
+      border-left: 4px solid var(--accent);
+      padding: 1rem 1.25rem;
+      border-radius: 0 8px 8px 0;
+      margin: 1.5rem 0;
+      display: flex;
+      gap: 0.75rem;
+    }
+
+    .alert-icon {
+      font-size: 1.25rem;
+      line-height: 1;
+      user-select: none;
+    }
+
+    .alert-content p {
+      margin-bottom: 0;
+      font-size: 0.9rem;
+      color: #78350f;
+    }
+
+    .alert-content strong {
+      color: #451a03;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1.5rem 0;
+    }
+
+    th, td {
+      padding: 0.75rem 1rem;
+      border: 1px solid var(--border);
+      text-align: left;
+      font-size: 0.9rem;
+    }
+
+    th {
+      background-color: #f9fafb;
+      font-weight: 600;
+      color: var(--primary);
+    }
+
+    .step-box {
+      border: 1px solid var(--border);
+      padding: 1.5rem;
+      border-radius: 8px;
+      background-color: #fafafa;
+      margin: 1rem 0;
+    }
+
+    .step-box h4 {
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+      color: var(--primary);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .step-num {
+      background: var(--primary);
+      color: white;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.75rem;
+      font-weight: 700;
+    }
+
+    footer {
+      margin-top: 3rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid var(--border);
+      text-align: center;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+
+    /* Print Styles */
+    @media print {
+      body {
+        background-color: white;
+        color: black;
+        padding: 0;
+      }
+      .container {
+        box-shadow: none;
+        border: none;
+        padding: 0;
+        max-width: 100%;
+      }
+      pre {
+        background: #f3f4f6;
+        color: #1f2937;
+        border-color: #d1d5db;
+        page-break-inside: avoid;
+      }
+      .alert {
+        background: #fffbeb;
+        border-color: #d97706;
+        page-break-inside: avoid;
+      }
+      th {
+        background-color: #f3f4f6 !important;
+      }
+      h2, h3 {
+        page-break-after: avoid;
+      }
+      .step-box {
+        page-break-inside: avoid;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <header>
+      <div class="header-title">
+        <h1>Handbuch & Dokumentation</h1>
+        <p>Ticketshop "Das Wilde Weib" — Systemverwaltung</p>
+      </div>
+      <div class="header-meta">
+        <p>Status: Live / Online</p>
+        <p>Version: 1.0 (PostgreSQL)</p>
+      </div>
+    </header>
+
+    <section>
+      <p>Dieses Handbuch beschreibt die Einbindung auf Ihrer Homepage, den Betrieb am Tag der Veranstaltung (inkl. des ausfallsicheren Offline-Modus), die Verwaltung von Passwörtern (PINs) sowie die Bedienung des Admin-Dashboards.</p>
+    </section>
+
+    <section>
+      <h2>1. Einpflegen des Shops auf eine Webseite</h2>
+      <p>Da der Ticketshop auf dem hochverfügbaren Servernetzwerk von <strong>Netlify</strong> gehostet wird, binden wir ihn per <strong>Iframe</strong> (Fenster-in-Fenster) auf Ihrer Strato-, Hostinger- oder WordPress-Webseite ein. Dadurch läuft der Shop direkt in Ihrem Design.</p>
+      
+      <h3>HTML-Einbettungscode:</h3>
+      <p>Erstellen Sie eine neue Unterseite auf Ihrer Homepage (z. B. <code>tickets.html</code>) und fügen Sie im HTML-Editor folgenden Code ein:</p>
+      
+      <pre><code>&lt;iframe 
+  src="https://wondrous-gumdrop-b59508.netlify.app/?embed=true" 
+  style="width: 100%; height: 950px; border: none; overflow: hidden;"
+  scrolling="no"
+&gt;&lt;/iframe&gt;</code></pre>
+
+      <div class="alert">
+        <div class="alert-icon">💡</div>
+        <div class="alert-content">
+          <p><strong>Wie funktioniert ?embed=true?</strong> Dieser Parameter signalisiert dem Ticketshop, dass er eingebettet wird. Er schaltet automatisch den großen Hintergrundbanner aus und optimiert das Layout, damit der Shop wie ein nativer Bestandteil Ihrer eigenen Webseite aussieht.</p>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2>2. Einrichten der Offline-Funktionalität (Veranstaltungstag)</h2>
+      <p>Bei Veranstaltungen fallen Mobilfunknetze und Internetverbindungen oft aus. Um einen absolut reibungslosen Einlass zu garantieren, besitzt das System einen <strong>lokalen Offline-Modus</strong>. Alle Handys der Ticket-Scanner gleichen die Codes dann direkt mit Ihrem Laptop ab.</p>
+
+      <h3>Benötigte Hardware vor Ort:</h3>
+      <ul>
+        <li><strong>Laptop</strong> (auf dem dieses Programm installiert ist).</li>
+        <li><strong>Standard WLAN-Router</strong> (dieser muss <strong>nicht</strong> mit dem Internet verbunden sein).</li>
+        <li><strong>Smartphones</strong> der Helfer für den Einlass-Scan.</li>
+      </ul>
+
+      <h3>Schritt-für-Schritt-Ablauf am Einlasstag:</h3>
+
+      <div class="step-box">
+        <h4><span class="step-num">1</span> Daten aus der Cloud laden (Zuhause mit Internet)</h4>
+        <p>Bevor Sie zum Veranstaltungsort aufbrechen, müssen Sie die aktuellen Buchungen aus der Cloud auf Ihren Laptop laden:</p>
+        <ol>
+          <li>Öffnen Sie den Projektordner auf Ihrem Laptop.</li>
+          <li>Klicken Sie doppelt auf die Datei <code>Ticketshop-Starten.bat</code>.</li>
+          <li>Drücken Sie die Taste <code>1</code> auf Ihrer Tastatur und bestätigen Sie mit <code>Enter</code>.</li>
+          <li>Das Skript lädt nun alle Tickets und Reservierungen herunter. Sobald es fertig ist, können Sie das Fenster schließen.</li>
+        </ol>
+      </div>
+
+      <div class="step-box">
+        <h4><span class="step-num">2</span> Lokales WLAN aufbauen (Am Veranstaltungsort)</h4>
+        <p>Bauen Sie vor Ort das Offline-Netzwerk auf:</p>
+        <ol>
+          <li>Schalten Sie den WLAN-Router ein.</li>
+          <li>Verbinden Sie Ihren Laptop mit dem WLAN dieses Routers.</li>
+          <li>Verbinden Sie die Smartphones aller Einlass-Helfer ebenfalls mit diesem WLAN.</li>
+        </ol>
+      </div>
+
+      <div class="step-box">
+        <h4><span class="step-num">3</span> Offline-Server starten</h4>
+        <p>Starten Sie das lokale System auf Ihrem Laptop:</p>
+        <ol>
+          <li>Klicken Sie doppelt auf die Datei <code>Ticketshop-Starten.bat</code>.</li>
+          <li>Drücken Sie die Taste <code>2</code> und bestätigen Sie mit <code>Enter</code>.</li>
+          <li>Ihr Laptop stellt sich auf die Offline-Datenbank um, startet den Server und öffnet das Verkäufer-Terminal im Browser.</li>
+        </ol>
+      </div>
+
+      <div class="step-box">
+        <h4><span class="step-num">4</span> Scanner-Handys verbinden</h4>
+        <p>Richten Sie die Handys Ihrer Helfer ein:</p>
+        <ol>
+          <li>Auf dem schwarzen Konsolenfenster Ihres Laptops wird Ihre aktuelle IP-Adresse angezeigt (z. B. <code>http://192.168.1.50:3000/scan</code>).</li>
+          <li>Die Helfer tippen diesen Link in den Browser (Safari/Chrome) ihres Handys ein.</li>
+          <li>Nach Bestätigung des Kamerazugriffs können die Helfer Tickets scannen. Alle Scans werden in Echtzeit auf Ihrem Laptop abgeglichen!</li>
+        </ol>
+      </div>
+    </section>
+
+    <section>
+      <h2>3. Ändern der Passwörter (PINs)</h2>
+      <p>Der Ticketshop besitzt zwei Sicherheits-PINs: Die <strong>Admin-PIN</strong> (Standard: <code>4321</code>) für Gutscheine und Buchungslisten sowie die <strong>Seller-PIN</strong> (Standard: <code>1234</code>) für das Kassenpersonal.</p>
+
+      <h3>A. PINs für die Webseite (Netlify) ändern:</h3>
+      <ol>
+        <li>Loggen Sie sich auf <strong>Netlify.com</strong> ein.</li>
+        <li>Navigieren Sie zu Ihrem Projekt und klicken Sie im Menü links auf <strong>Site configuration</strong> -&gt; <strong>Environment variables</strong>.</li>
+        <li>Suchen Sie nach dem Eintrag <code>ADMIN_PIN</code> bzw. <code>SELLER_PIN</code>.</li>
+        <li>Klicken Sie auf das Menü (drei Punkte) daneben, wählen Sie <strong>Edit</strong>, tragen Sie den neuen Wert ein und speichern Sie.</li>
+        <li>Gehen Sie links im Menü auf <strong>Deploys</strong>, klicken Sie auf <strong>Trigger deploy</strong> -&gt; <strong>Deploy project without cache</strong>. Nach ca. einer Minute sind die neuen PINs auf Ihrer Live-Webseite aktiv.</li>
+      </ol>
+
+      <h3>B. PINs für den Offline-Laptop ändern:</h3>
+      <ol>
+        <li>Öffnen Sie im Projektordner des Laptops die Konfigurationsdatei <code>.env</code> mit einem Texteditor.</li>
+        <li>Ändern Sie die PINs in den entsprechenden Zeilen:
+          <pre><code>ADMIN_PIN="IhreNeueAdminPin"
+SELLER_PIN="IhreNeueSellerPin"</code></pre>
+        </li>
+        <li>Speichern und schließen Sie die Datei. Die neuen PINs sind ab dem nächsten Start über die <code>.bat</code>-Datei lokal aktiv.</li>
+      </ol>
+    </section>
+
+    <section>
+      <h2>4. Bedienung des Admin-Dashboards</h2>
+      <p>Das Admin-Dashboard erreichen Sie unter <code>https://ihre-seite.netlify.app/admin</code> (bzw. offline unter <code>http://localhost:3000/admin</code>).</p>
+      
+      <h3>Gutscheincodes anlegen und verwalten:</h3>
+      <p>Sie können flexibel Gutscheincodes erstellen, um Rabatte zu gewähren. Das System unterstützt zwei Gutschein-Typen:</p>
+      
+      <table>
+        <thead>
+          <tr>
+            <th>Gutschein-Typ</th>
+            <th>Funktion</th>
+            <th>Beispiel</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>PERCENT</strong> (Prozentual)</td>
+            <td>Zieht einen prozentualen Rabatt von der Gesamtsumme ab.</td>
+            <td>Wert: <code>20</code> zieht 20% ab (z.B. 8,00 € Ersparnis bei 40 € Ticketpreis).</td>
+          </tr>
+          <tr>
+            <td><strong>FIXED</strong> (Festbetrag)</td>
+            <td>Zieht einen festen Euro-Betrag von der Gesamtsumme ab.</td>
+            <td>Wert: <code>5.00</code> zieht exakt 5,00 € vom Gesamtpreis ab.</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3>Schritte zum Erstellen eines Gutscheins:</h3>
+      <ol>
+        <li>Melden Sie sich mit Ihrer Admin-PIN im Dashboard an.</li>
+        <li>Klicken Sie auf die Schaltfläche <strong>"Gutscheincode hinzufügen"</strong>.</li>
+        <li>Geben Sie den Wunschnamen ein (z. B. <code>RABATT2026</code>).</li>
+        <li>Wählen Sie den Typ (<code>PERCENT</code> oder <code>FIXED</code>) und geben Sie den Wert ein.</li>
+        <li>Geben Sie optional bei <code>Max. Einlösungen</code> ein Limit ein (z. B. <code>50</code>, wenn der Gutschein nur für die ersten 50 Käufe gelten soll). Lassen Sie das Feld leer für unbegrenzte Nutzungen.</li>
+        <li>Klicken Sie auf <strong>"Gutschein erstellen"</strong>. Der Gutschein ist ab sofort live im Online-Shop und an der Abendkasse nutzbar!</li>
+      </ol>
+
+      <div class="alert" style="background-color: #eff6ff; border-color: #3b82f6;">
+        <div class="alert-icon" style="color: #2563eb;">ℹ️</div>
+        <div class="alert-content" style="color: #1e3a8a;">
+          <p><strong>Gutscheine löschen:</strong> Wenn eine Aktion abgelaufen ist, können Sie den Gutscheincode in der Admin-Tabelle ganz einfach mit einem Klick auf <strong>"Löschen"</strong> dauerhaft deaktivieren.</p>
+        </div>
+      </div>
+    </section>
+
+    <footer>
+      <p>© 2026 Musical-Produktion "Das Wilde Weib". Alle Rechte vorbehalten.</p>
+    </footer>
+  </div>
+
+</body>
+</html>
