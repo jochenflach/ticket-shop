@@ -11,7 +11,8 @@ import {
   KeyRound, 
   Info,
   ChevronRight,
-  FolderOpen
+  FolderOpen,
+  Copy
 } from 'lucide-react';
 import styles from './seatmap.module.css';
 
@@ -261,6 +262,36 @@ export default function SeatmapEditor() {
 
     setBlocks([...blocks, newBlock]);
     setSelectedBlockId(nextId);
+  };
+
+  // Duplicate Block
+  const handleDuplicateBlock = () => {
+    if (!selectedBlockId) return;
+    const blockToCopy = blocks.find(b => b.id === selectedBlockId);
+    if (!blockToCopy) return;
+
+    // Find next free letter ID
+    const existingIds = blocks.map(b => b.id);
+    let nextId = 'A';
+    for (let i = 65; i < 90; i++) {
+      const char = String.fromCharCode(i);
+      if (!existingIds.includes(char)) {
+        nextId = char;
+        break;
+      }
+    }
+
+    const duplicatedBlock: Block = {
+      ...blockToCopy,
+      id: nextId,
+      rowPrefix: nextId,
+      startX: Math.min(1000 - 150, blockToCopy.startX + 50),
+      startY: Math.min(800 - 150, blockToCopy.startY + 50),
+    };
+
+    setBlocks([...blocks, duplicatedBlock]);
+    setSelectedBlockId(nextId);
+    setEditorSuccess(`Block ${blockToCopy.id} wurde erfolgreich als Block ${nextId} dupliziert.`);
   };
 
   // Delete Block
@@ -599,7 +630,7 @@ export default function SeatmapEditor() {
                       const labelY = rowFirstSeat ? rowFirstSeat.y : block.startY + r * rowSpacing;
 
                       return (
-                        <text key={`label-r-${r}`} x={block.startX - 22} y={labelY + 13} className={styles.rowLabelText}>
+                        <text key={`label-r-${r}`} x={block.startX - 30} y={labelY + 13} className={styles.rowLabelText}>
                           R {r + 1}
                         </text>
                       );
@@ -761,13 +792,24 @@ export default function SeatmapEditor() {
                 </div>
               </div>
 
-              <button 
-                onClick={() => handleDeleteBlock(selectedBlock.id)}
-                className={styles.deleteBlockButton}
-              >
-                <Trash2 size={14} />
-                Block löschen
-              </button>
+              <div style={{ display: 'flex', gap: '0.5rem', marginTop: '1rem' }}>
+                <button 
+                  onClick={handleDuplicateBlock}
+                  className={styles.actionButton}
+                  style={{ flex: 1, backgroundColor: '#3b82f6', color: '#fff', border: 'none', justifyContent: 'center', gap: '0.4rem', height: '38px', borderRadius: '6px', fontWeight: 600, fontSize: '0.85rem', cursor: 'pointer' }}
+                >
+                  <Copy size={14} />
+                  Duplizieren
+                </button>
+                <button 
+                  onClick={() => handleDeleteBlock(selectedBlock.id)}
+                  className={styles.deleteBlockButton}
+                  style={{ flex: 1, margin: 0, height: '38px', justifyContent: 'center' }}
+                >
+                  <Trash2 size={14} />
+                  Löschen
+                </button>
+              </div>
             </div>
           ) : (
             <div className={styles.emptyState}>
