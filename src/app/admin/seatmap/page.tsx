@@ -530,6 +530,8 @@ export default function SeatmapEditor() {
   // ==========================================
   // VIEW: Editor Page
   // ==========================================
+  const totalSeats = blocks.reduce((sum, b) => sum + (b.rows * b.seatsPerRow), 0);
+
   return (
     <main className={styles.container}>
       <div className={styles.glowingBackground}></div>
@@ -560,9 +562,12 @@ export default function SeatmapEditor() {
         {/* Left Column: Canvas */}
         <section className={styles.canvasCard}>
           <div className={styles.canvasHeader}>
-            <h3 style={{display: 'flex', alignItems: 'center', gap: '0.5rem'}}>
+            <h3 style={{display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap'}}>
               <FolderOpen size={18} style={{color: '#d97706'}} />
-              {layoutName}
+              <span>{layoutName}</span>
+              <span style={{ fontSize: '0.8rem', backgroundColor: 'rgba(217, 119, 6, 0.1)', color: '#d97706', padding: '0.2rem 0.6rem', borderRadius: '20px', fontWeight: 700, marginLeft: '0.5rem' }}>
+                Gesamtkapazität: {totalSeats} Plätze
+              </span>
             </h3>
             <div className={styles.canvasActions}>
               <button 
@@ -652,7 +657,7 @@ export default function SeatmapEditor() {
                     />
                     
                     <text x={block.startX} y={block.startY - 18} className={styles.blockLabelText}>
-                      Block {block.id} ({block.category}, {block.price.toFixed(2)} €)
+                      Block {block.id} ({block.category === 'KAT1' ? 'Premium' : 'Standard'}, {block.price.toFixed(2)} €, {block.rows * block.seatsPerRow} Plätze)
                     </text>
 
                     {Array.from({ length: block.rows }).map((_, r) => {
@@ -732,8 +737,13 @@ export default function SeatmapEditor() {
             )}
           </div>
 
-          <div className={styles.cardHeader} style={{marginTop: '-0.5rem'}}>
+          <div className={styles.cardHeader} style={{marginTop: '-0.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
             <h2>Block-Eigenschaften</h2>
+            {selectedBlock && (
+              <span style={{ fontSize: '0.8rem', backgroundColor: 'rgba(59, 130, 246, 0.1)', color: '#3b82f6', padding: '0.15rem 0.5rem', borderRadius: '12px', fontWeight: 700 }}>
+                {selectedBlock.rows * selectedBlock.seatsPerRow} Plätze
+              </span>
+            )}
           </div>
 
           {selectedBlock ? (
