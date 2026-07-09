@@ -1,0 +1,73 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model Seat {
+  id        String     @id // e.g. "Reihe-1-Sitz-1"
+  row       Int        // 1 to 16
+  number    Int        // 1 to 20
+  category  String     // 'PREMIUM', 'KAT1', 'KAT2'
+  price     Float
+  locks     SeatLock[]
+  tickets   Ticket[]
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+}
+
+model SeatLock {
+  id        String   @id @default(cuid())
+  seatId    String   @unique
+  seat      Seat     @relation(fields: [seatId], references: [id], onDelete: Cascade)
+  lockedAt  DateTime @default(now())
+  lockedBy  String   // Session ID or Seller PIN/ID
+}
+
+model Order {
+  id              String   @id @default(cuid())
+  customerName    String
+  customerEmail   String
+  totalAmount     Float
+  status          String   // 'PENDING', 'PAID', 'CANCELLED'
+  source          String   // 'CUSTOMER' or 'SELLER'
+  stripeSessionId String?  @unique
+  promoCodeId     String?
+  promoCode       PromoCode? @relation(fields: [promoCodeId], references: [id])
+  discountAmount  Float?     @default(0)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  tickets         Ticket[]
+}
+
+model Ticket {
+  id          String    @id @default(cuid())
+  orderId     String
+  order       Order     @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  seatId      String
+  seat        Seat      @relation(fields: [seatId], references: [id])
+  ticketType  String    @default("NORMAL") // 'NORMAL', 'STUDENT', 'CHILD', 'FREE'
+  pricePaid   Float     @default(0.0)      // Actual price paid after discounts/reductions
+  ticketCode  String    @unique // Code for scanning (e.g. random token)
+  checkedIn   Boolean   @default(false)
+  checkedInAt DateTime?
+  createdAt   DateTime  @default(now())
+}
+
+model PromoCode {
+  id          String   @id @default(cuid())
+  code        String   @unique // e.g. "EARLYBIRD"
+  type        String   // "PERCENT" or "FIXED"
+  value       Float    // e.g. 10.0 for 10% or 5.0 for 5 €
+  isActive    Boolean  @default(true)
+  maxUses     Int?     // Limit on number of redemptions
+  usedCount   Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  orders      Order[]
+}

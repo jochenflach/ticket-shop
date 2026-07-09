@@ -1,0 +1,215 @@
+.main {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  padding: 2rem 1.5rem;
+}
+
+.container {
+  width: 100%;
+  max-width: 500px;
+  padding: 2.5rem;
+  border-radius: 16px;
+  animation: fadeIn 0.5s ease-out;
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.header h1 {
+  font-size: 1.75rem;
+  margin-bottom: 0.5rem;
+  font-weight: 800;
+  color: var(--text);
+}
+
+.header p {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+
+.warningBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: rgba(245, 158, 11, 0.1);
+  border: 1px solid rgba(245, 158, 11, 0.25);
+  color: #fcd34d;
+  padding: 0.4rem 0.8rem;
+  border-radius: 8px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  margin-bottom: 1.25rem;
+}
+
+.loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  padding: 3rem 0;
+  color: var(--text-muted);
+}
+
+.spinner {
+  animation: spin 1s linear infinite;
+  color: var(--primary);
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.errorBox {
+  text-align: center;
+  padding: 2rem 0;
+}
+
+.errorBox h2 {
+  color: #f87171;
+  font-size: 1.25rem;
+  margin-bottom: 0.75rem;
+}
+
+.errorBox p {
+  color: var(--text-muted);
+  margin-bottom: 1.5rem;
+}
+
+.backButton {
+  background: var(--border);
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-weight: 600;
+  transition: background 0.2s;
+}
+
+.backButton:hover {
+  background: var(--bg-surface-hover);
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.orderSummary {
+  background: rgba(0, 0, 0, 0.25);
+  border: 1px solid var(--border);
+  padding: 1.25rem;
+  border-radius: 10px;
+}
+
+.orderSummary h3 {
+  font-size: 1rem;
+  font-weight: 700;
+  margin-bottom: 0.75rem;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 0.5rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.summaryRow {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.4rem 0;
+  font-size: 0.95rem;
+}
+
+.summaryRow > span:first-child {
+  color: var(--text-muted);
+}
+
+.bold {
+  font-weight: 600;
+  color: var(--text);
+}
+
+.totalAmount {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: var(--accent);
+}
+
+.terminal {
+  background: #17112c;
+  border: 2px dashed var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.terminalHeader {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: rgba(0, 0, 0, 0.3);
+  padding: 0.75rem 1rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--primary);
+  border-bottom: 1px solid var(--border);
+}
+
+.terminalBody {
+  padding: 1.25rem;
+  text-align: center;
+}
+
+.terminalBody p {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin-bottom: 1.25rem;
+  line-height: 1.4;
+}
+
+.payButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 1rem;
+  background: linear-gradient(135deg, var(--accent) 0%, #d97706 100%);
+  color: #090514;
+  font-weight: 700;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  box-shadow: 0 4px 15px rgba(251, 191, 36, 0.15);
+  transition: all 0.2s;
+}
+
+.payButton:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(251, 191, 36, 0.25);
+}
+
+.payButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.cancelButton {
+  text-align: center;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  padding: 0.5rem;
+  font-weight: 500;
+  transition: color 0.2s;
+}
+
+.cancelButton:hover {
+  color: #f87171;
+}

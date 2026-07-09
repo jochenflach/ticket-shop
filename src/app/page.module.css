@@ -1,0 +1,745 @@
+.main {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2.5rem 1.5rem;
+  position: relative;
+  z-index: 1;
+}
+
+.embeddedMain {
+  padding: 1rem 0.5rem !important;
+  max-width: 100% !important;
+}
+
+/* Glowing ambient backgrounds */
+.glowingBackground {
+  position: fixed;
+  top: -10%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 80%;
+  height: 400px;
+  background: radial-gradient(circle, rgba(139, 92, 246, 0.08) 0%, rgba(99, 102, 241, 0.03) 50%, transparent 100%);
+  pointer-events: none;
+  z-index: -2;
+  filter: blur(80px);
+}
+
+/* Header & Hero Area */
+.header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  margin-bottom: 3.5rem;
+  animation: fadeIn 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: rgba(251, 191, 36, 0.08);
+  border: 1px solid rgba(251, 191, 36, 0.15);
+  padding: 0.4rem 1rem;
+  border-radius: 9999px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 1.25rem;
+}
+
+.goldText {
+  color: var(--accent);
+}
+
+.purpleText {
+  color: var(--primary);
+}
+
+.greenText {
+  color: var(--color-free);
+}
+
+.title {
+  font-size: clamp(2.5rem, 6vw, 4.5rem);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  background: linear-gradient(to bottom, #ffffff 40%, #c4b5fd 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: 0 0 50px rgba(167, 139, 250, 0.15);
+  margin-bottom: 0.75rem;
+}
+
+.subtitle {
+  font-size: clamp(1rem, 2.5vw, 1.25rem);
+  color: var(--text-muted);
+  max-width: 650px;
+  margin-bottom: 2.5rem;
+  font-weight: 400;
+}
+
+.infoRow {
+  display: flex;
+  gap: 1.25rem;
+  flex-wrap: wrap;
+  justify-content: center;
+  width: 100%;
+  max-width: 800px;
+}
+
+.infoCard {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  background: rgba(25, 15, 51, 0.4);
+  border: 1px solid var(--border);
+  padding: 0.8rem 1.5rem;
+  border-radius: 14px;
+  flex: 1;
+  min-width: 220px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+}
+
+.infoCard h3 {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 600;
+}
+
+.infoCard p {
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: var(--text);
+}
+
+/* Grid Layout */
+.grid {
+  display: grid;
+  grid-template-columns: 1.5fr 1fr;
+  gap: 2rem;
+  align-items: start;
+}
+
+@media (max-width: 968px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Cards */
+.card {
+  padding: 2rem;
+}
+
+.cardHeader {
+  margin-bottom: 1.75rem;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 1rem;
+}
+
+.cardHeader h2 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: 0.35rem;
+}
+
+.cardHeader p {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+}
+
+/* Legend items styling */
+.legend {
+  display: flex;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+  margin-bottom: 1rem;
+}
+
+.categoryLegend {
+  display: flex;
+  gap: 1.25rem;
+  flex-wrap: wrap;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1.25rem;
+  border-bottom: 1px solid var(--border);
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.legendItem {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.legendBox {
+  width: 14px;
+  height: 14px;
+  border-radius: 4px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+}
+
+.seatFree {
+  background-color: rgba(52, 211, 153, 0.1);
+  border: 1.5px solid var(--color-free);
+}
+
+.seatSelected {
+  background-color: var(--color-selected);
+}
+
+.seatLocked {
+  background-color: var(--color-locked);
+}
+
+.seatBooked {
+  background-color: var(--color-booked);
+}
+
+.catPremiumDot { color: var(--cat-premium); font-size: 1.1rem; }
+.catKat1Dot { color: var(--cat-kat1); font-size: 1.1rem; }
+.catKat2Dot { color: var(--cat-kat2); font-size: 1.1rem; }
+
+/* Seatmap Frame & SVG */
+.seatMapWrapper {
+  position: relative;
+  width: 100%;
+  background: rgba(0, 0, 0, 0.25);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 2.5rem 1rem;
+  overflow-x: auto;
+  display: flex;
+  justify-content: center;
+  box-shadow: inset 0 4px 30px rgba(0, 0, 0, 0.4);
+}
+
+.loadingOverlay {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  padding: 4rem 0;
+  color: var(--text-muted);
+}
+
+.spinner {
+  animation: spin 1.2s linear infinite;
+  color: var(--primary);
+}
+
+.mr2 {
+  margin-right: 0.5rem;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.svgContainer {
+  width: 100%;
+  min-width: 680px;
+  max-width: 820px;
+}
+
+.svgSeatmap {
+  width: 100%;
+  height: auto;
+  user-select: none;
+}
+
+.stagePath {
+  stroke-dasharray: 6 4;
+  filter: drop-shadow(0 0 10px rgba(251, 191, 36, 0.3));
+}
+
+.stageText {
+  fill: var(--accent);
+  font-family: var(--font-sans);
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.25em;
+}
+
+.rowLabelText {
+  fill: var(--text-muted);
+  font-size: 9px;
+  font-family: var(--font-sans);
+  font-weight: 600;
+  opacity: 0.6;
+}
+
+/* Interactive SVG Rect Seats */
+.svgSeat {
+  fill: rgba(255, 255, 255, 0.02);
+  stroke-width: 1.5;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.svgSeatFree {
+  fill: rgba(52, 211, 153, 0.05);
+  cursor: pointer;
+}
+
+.svgSeatFree:hover {
+  fill: rgba(52, 211, 153, 0.25);
+  stroke-width: 2.5;
+  filter: drop-shadow(0 0 5px var(--color-free));
+}
+
+.svgSeatSelected {
+  fill: var(--color-selected);
+  stroke: var(--color-selected) !important;
+  filter: drop-shadow(0 0 8px rgba(59, 130, 246, 0.6));
+  cursor: pointer;
+}
+
+.svgSeatSelected:hover {
+  opacity: 0.95;
+  stroke: #ffffff !important;
+  stroke-width: 2;
+}
+
+.svgSeatLocked {
+  fill: var(--color-locked);
+  stroke: var(--color-locked) !important;
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.svgSeatBooked {
+  fill: var(--color-booked);
+  stroke: var(--color-booked) !important;
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.seatNumberInside {
+  fill: rgba(255, 255, 255, 0.35);
+  font-size: 7px;
+  font-weight: 700;
+  pointer-events: none;
+  font-family: var(--font-sans);
+}
+
+.svgSeatSelected + .seatNumberInside {
+  fill: #ffffff;
+}
+
+/* Checkout Sidebar & Form */
+.checkoutSection {
+  position: sticky;
+  top: 2rem;
+}
+
+.errorAlert {
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  color: #fca5a5;
+  padding: 0.85rem 1.25rem;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  margin-bottom: 1.5rem;
+  font-weight: 500;
+}
+
+.emptyCart {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 4rem 1.5rem;
+  color: var(--text-muted);
+}
+
+.textMuted {
+  color: var(--text-muted);
+  opacity: 0.4;
+  margin-bottom: 1rem;
+}
+
+.hint {
+  font-size: 0.85rem;
+  margin-top: 0.5rem;
+}
+
+.cartContainer {
+  display: flex;
+  flex-direction: column;
+  animation: fadeIn 0.4s ease-out;
+}
+
+.ticketsList {
+  max-height: 250px;
+  overflow-y: auto;
+  margin-bottom: 1.25rem;
+  padding-right: 0.25rem;
+}
+
+.ticketItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.85rem 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.ticketDetails {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.ticketTitle {
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.ticketCategory {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.ticketPrice {
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+
+.reservationNotice {
+  font-size: 0.8rem;
+  background: rgba(249, 115, 22, 0.08);
+  border: 1px solid rgba(249, 115, 22, 0.15);
+  color: #fdba74;
+  padding: 0.6rem 0.85rem;
+  border-radius: 6px;
+  text-align: center;
+  margin-bottom: 1.5rem;
+  font-weight: 500;
+}
+
+.totalPriceRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.75rem;
+  padding-top: 0.5rem;
+}
+
+.totalPriceRow > span:first-child {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.totalPrice {
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: var(--accent);
+}
+
+/* Form Styles */
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.formGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.formGroup label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.formGroup input {
+  background: rgba(0, 0, 0, 0.25);
+  border: 1px solid var(--border);
+  color: #ffffff;
+  padding: 0.85rem 1rem;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-family: var(--font-sans);
+  transition: all 0.25s ease;
+}
+
+.formGroup input:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px var(--primary-glow);
+}
+
+.checkoutButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 1.1rem;
+  border-radius: 10px;
+  background: linear-gradient(135deg, var(--accent) 0%, #d97706 100%);
+  color: #0d081b;
+  font-weight: 700;
+  font-size: 1rem;
+  box-shadow: 0 4px 20px rgba(251, 191, 36, 0.15);
+  transition: all 0.2s ease;
+}
+
+.checkoutButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 24px rgba(251, 191, 36, 0.25);
+}
+
+.checkoutButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.securitySeal {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  margin-top: 1.25rem;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  opacity: 0.8;
+}
+
+/* Floating Timer at top right */
+.floatingTimer {
+  position: fixed;
+  top: 1.5rem;
+  right: 1.5rem;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  background: rgba(18, 12, 31, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1.5px solid rgba(245, 158, 11, 0.4);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), 0 0 15px rgba(245, 158, 11, 0.2);
+  padding: 0.65rem 1.1rem;
+  border-radius: 12px;
+  color: #fbbf24;
+  font-family: var(--font-sans);
+  animation: floatIn 0.3s ease-out, timerPulse 2s infinite ease-in-out;
+}
+
+.floatingTimerUrgent {
+  border-color: rgba(239, 68, 68, 0.6);
+  color: #f87171;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), 0 0 20px rgba(239, 68, 68, 0.3);
+  animation: floatIn 0.3s ease-out, timerPulseFast 1s infinite ease-in-out;
+}
+
+.timerDetails {
+  display: flex;
+  flex-direction: column;
+}
+
+.timerTitle {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.timerCountdown {
+  font-size: 1.15rem;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.1;
+  margin-top: 0.1rem;
+}
+
+.flashingIcon {
+  animation: flash 1s infinite step-end;
+}
+
+@keyframes floatIn {
+  from { transform: translateY(-10px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes timerPulse {
+  0%, 100% { box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), 0 0 15px rgba(245, 158, 11, 0.1); }
+  50% { box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), 0 0 25px rgba(245, 158, 11, 0.35); }
+}
+
+@keyframes timerPulseFast {
+  0%, 100% { box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), 0 0 20px rgba(239, 68, 68, 0.2); transform: scale(1.02); }
+  50% { box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), 0 0 30px rgba(239, 68, 68, 0.5); transform: scale(0.98); }
+}
+
+@keyframes flash {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+
+@media (max-width: 768px) {
+  .floatingTimer {
+    top: 0.75rem;
+    right: 0.75rem;
+    padding: 0.5rem 0.85rem;
+  }
+  .timerCountdown {
+    font-size: 1rem;
+  }
+}
+
+/* Ticket Type Dropdown */
+.ticketTypeSelect {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  border-radius: 6px;
+  font-size: 0.75rem;
+  padding: 0.25rem 0.5rem;
+  margin-top: 0.4rem;
+  cursor: pointer;
+  font-family: var(--font-sans);
+  transition: all 0.2s ease;
+  width: fit-content;
+}
+
+.ticketTypeSelect:focus {
+  outline: none;
+  border-color: var(--primary);
+  color: var(--text);
+  background: rgba(18, 12, 31, 0.95);
+}
+
+/* Promo Section */
+.promoSection {
+  margin-top: 1.25rem;
+  margin-bottom: 1.25rem;
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  padding: 1rem 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.promoForm {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.promoInput {
+  flex: 1;
+  background: rgba(0, 0, 0, 0.25);
+  border: 1px solid var(--border);
+  color: #ffffff;
+  padding: 0.5rem 0.75rem;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-family: var(--font-sans);
+}
+
+.promoInput:focus {
+  outline: none;
+  border-color: var(--primary);
+}
+
+.promoButton {
+  background: rgba(139, 92, 246, 0.1);
+  border: 1px solid rgba(139, 92, 246, 0.3);
+  color: #c084fc;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.promoButton:hover:not(:disabled) {
+  background: rgba(139, 92, 246, 0.25);
+  border-color: var(--primary);
+  color: #ffffff;
+}
+
+.promoButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.promoError {
+  font-size: 0.75rem;
+  color: #f87171;
+  margin-top: 0.25rem;
+}
+
+.promoApplied {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(52, 211, 153, 0.06);
+  border: 1px solid rgba(52, 211, 153, 0.15);
+  color: #34d399;
+  padding: 0.4rem 0.75rem;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.promoRemoveBtn {
+  background: transparent;
+  border: none;
+  color: #f87171;
+  font-size: 0.75rem;
+  font-weight: 700;
+  cursor: pointer;
+  padding: 0;
+  text-decoration: underline;
+}
+
+.promoRemoveBtn:hover {
+  color: #ef4444;
+}
+
+/* Price Breakdown */
+.priceBreakdown {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.priceRow {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.9rem;
+  color: var(--text-muted);
+}
+
+.discountRow {
+  color: #34d399;
+  font-weight: 600;
+}
+
