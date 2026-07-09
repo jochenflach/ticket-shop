@@ -208,9 +208,14 @@ export default function AdminDashboard() {
           <h1>Rabattcode-Manager</h1>
           <p className={styles.subtitle}>Gutscheine erstellen, überwachen und deaktivieren</p>
         </div>
-        <button onClick={handleLogout} className={styles.logoutButton}>
-          Abmelden
-        </button>
+        <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
+          <a href="/admin/seatmap" className={styles.logoutButton} style={{ textDecoration: 'none', backgroundColor: '#d97706', color: '#fff', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+            Saalplan-Editor
+          </a>
+          <button onClick={handleLogout} className={styles.logoutButton}>
+            Abmelden
+          </button>
+        </div>
       </header>
 
       <div className={styles.grid}>

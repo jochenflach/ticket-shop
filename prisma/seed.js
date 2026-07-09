@@ -39,12 +39,25 @@ async function main() {
 
       const id = `R${row}-S${number}`;
 
+      // Calculate standard SVG coordinates matching the original layout
+      const isRightSide = number > 10;
+      const x = 40 + (number - 1) * 25 + (isRightSide ? 30 : 0);
+      const baseY = 90 + (row - 1) * 28 + (row >= 7 ? 24 : 0);
+      let y = baseY;
+      if (row <= 6) {
+        const colOffset = number - 10.5;
+        const curveY = colOffset * colOffset * 0.18;
+        y += (16.2 - curveY);
+      }
+
       seats.push({
         id,
         row,
         number,
         category,
         price,
+        x,
+        y,
       });
     }
   }

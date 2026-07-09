@@ -15,6 +15,8 @@ interface Seat {
   status: 'free' | 'locked' | 'booked';
   lockedBy: string;
   isMine: boolean;
+  x: number;
+  y: number;
 }
 
 function TicketShopContent() {
@@ -491,9 +493,8 @@ function TicketShopContent() {
                   {Object.entries(rows).map(([rowNumStr, rowSeats]) => {
                     const rowNum = parseInt(rowNumStr);
                     
-                    // Add a vertical spacer gap of 24px between category 1 (rows 1-6) and category 2 (rows 7-16)
-                    const baseY = 90 + (rowNum - 1) * 28 + (rowNum >= 7 ? 24 : 0);
-                    const labelY = baseY;
+                    const firstSeatY = rowSeats[0]?.y ?? (90 + (rowNum - 1) * 28 + (rowNum >= 7 ? 24 : 0));
+                    const labelY = firstSeatY;
 
                     return (
                       <g key={rowNum} className={styles.seatRowGroup}>
@@ -502,16 +503,8 @@ function TicketShopContent() {
 
                         {/* Seats */}
                         {rowSeats.map((seat) => {
-                          const isRightSide = seat.number > 10;
-                          const x = 40 + (seat.number - 1) * 25 + (isRightSide ? 30 : 0);
-                          
-                          // Calculate curved Y offset for rows 1 to 6 (U-shape: center lower, sides higher)
-                          let y = baseY;
-                          if (rowNum <= 6) {
-                            const colOffset = seat.number - 10.5;
-                            const curveY = colOffset * colOffset * 0.18;
-                            y += (16.2 - curveY);
-                          }
+                          const x = seat.x;
+                          const y = seat.y;
 
                           let seatColorClass = styles.svgSeatFree;
                           let strokeColor = '';

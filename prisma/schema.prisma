@@ -16,6 +16,8 @@ model Seat {
   number    Int        // 1 to 20
   category  String     // 'PREMIUM', 'KAT1', 'KAT2'
   price     Float
+  x         Float      @default(0)
+  y         Float      @default(0)
   locks     SeatLock[]
   tickets   Ticket[]
   createdAt DateTime   @default(now())
