@@ -154,8 +154,8 @@ export default function SeatmapEditor() {
   // Convert client cursor coordinates to SVG coordinates
   const getSVGCoords = (e: React.MouseEvent<any>, svgElement: SVGSVGElement) => {
     const rect = svgElement.getBoundingClientRect();
-    const x = ((e.clientX - rect.left) / rect.width) * 650;
-    const y = ((e.clientY - rect.top) / rect.height) * 560;
+    const x = ((e.clientX - rect.left) / rect.width) * 800;
+    const y = ((e.clientY - rect.top) / rect.height) * 650;
     return { x, y };
   };
 
@@ -182,12 +182,12 @@ export default function SeatmapEditor() {
     let newY = coords.y - dragOffset.y;
 
     if (snapToGrid) {
-      newX = Math.round(newX / 10) * 10;
-      newY = Math.round(newY / 10) * 10;
+      newX = Math.round(newX / 25) * 25;
+      newY = Math.round(newY / 25) * 25;
     }
 
-    newX = Math.max(10, Math.min(600 - 50, newX));
-    newY = Math.max(60, Math.min(560 - 50, newY));
+    newX = Math.max(10, Math.min(800 - 100, newX));
+    newY = Math.max(60, Math.min(650 - 80, newY));
 
     setBlocks(blocks.map(b => b.id === draggedBlockId ? { ...b, startX: newX, startY: newY } : b));
   };
@@ -524,7 +524,7 @@ export default function SeatmapEditor() {
           <div className={styles.canvasWrapper}>
             <svg 
               ref={svgRef}
-              viewBox="0 0 650 560" 
+              viewBox="0 0 800 650" 
               className={styles.svgEditor}
               onMouseMove={handleCanvasMouseMove}
               onMouseUp={handleCanvasMouseUpOrLeave}
@@ -534,27 +534,27 @@ export default function SeatmapEditor() {
               {showGrid && (
                 <g>
                   <g className={styles.gridPatternSub}>
-                    {Array.from({ length: 65 }).map((_, i) => (
-                      <line key={`x-sub-${i}`} x1={i * 10} y1="0" x2={i * 10} y2="560" />
+                    {Array.from({ length: 81 }).map((_, i) => (
+                      <line key={`x-sub-${i}`} x1={i * 10} y1="0" x2={i * 10} y2="650" />
                     ))}
-                    {Array.from({ length: 56 }).map((_, i) => (
-                      <line key={`y-sub-${i}`} x1="0" y1={i * 10} x2="650" y2={i * 10} />
+                    {Array.from({ length: 66 }).map((_, i) => (
+                      <line key={`y-sub-${i}`} x1="0" y1={i * 10} x2="800" y2={i * 10} />
                     ))}
                   </g>
                   <g className={styles.gridPattern}>
-                    {Array.from({ length: 13 }).map((_, i) => (
-                      <line key={`x-${i}`} x1={i * 50} y1="0" x2={i * 50} y2="560" />
+                    {Array.from({ length: 17 }).map((_, i) => (
+                      <line key={`x-${i}`} x1={i * 50} y1="0" x2={i * 50} y2="650" />
                     ))}
-                    {Array.from({ length: 11 }).map((_, i) => (
-                      <line key={`y-${i}`} x1="0" y1={i * 50} x2="650" y2={i * 50} />
+                    {Array.from({ length: 14 }).map((_, i) => (
+                      <line key={`y-${i}`} x1="0" y1={i * 50} x2="800" y2={i * 50} />
                     ))}
                   </g>
                 </g>
               )}
 
               {/* Stage Reference */}
-              <line x1="120" y1="35" x2="530" y2="35" strokeWidth="8" strokeLinecap="round" className={styles.stagePath} />
-              <text x="325" y="55" textAnchor="middle" className={styles.stageText}>BÜHNE</text>
+              <line x1="200" y1="35" x2="600" y2="35" strokeWidth="8" strokeLinecap="round" className={styles.stagePath} />
+              <text x="400" y="55" textAnchor="middle" className={styles.stageText}>BÜHNE</text>
 
               {/* Render Blocks */}
               {blocks.map((block) => {
