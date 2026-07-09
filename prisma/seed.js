@@ -1,16 +1,25 @@
+require('dotenv').config();
 const { PrismaClient } = require('@prisma/client');
-const { PrismaBetterSqlite3 } = require('@prisma/adapter-better-sqlite3');
-const path = require('path');
 
-// Resolve path to the SQLite database file in the project root
-const dbPath = path.resolve(__dirname, '..', 'dev.db');
-const adapter = new PrismaBetterSqlite3({
-  url: `file:${dbPath}`
-});
-const prisma = new PrismaClient({ adapter });
+const dbUrl = process.env.DATABASE_URL || '';
+let prisma;
+
+if (dbUrl.startsWith('postgresql://') || dbUrl.startsWith('postgres://')) {
+  const { Pool } = require('pg');
+  const { PrismaPg } = require('@prisma/adapter-pg');
+  const pool = new Pool({ connectionString: dbUrl });
+  const adapter = new PrismaPg(pool);
+  prisma = new PrismaClient({ adapter });
+} else {
+  const { PrismaBetterSqlite3 } = require('@prisma/adapter-better-sqlite3');
+  const path = require('path');
+  const dbPath = path.resolve(__dirname, '..', 'dev.db');
+  const adapter = new PrismaBetterSqlite3({ url: `file:${dbPath}` });
+  prisma = new PrismaClient({ adapter });
+}
 
 async function main() {
-  console.log(`Seeding seats in database at: ${dbPath}...`);
+  console.log("Seeding seats in database...");
 
   // Clear existing seats
   await prisma.seat.deleteMany({});
