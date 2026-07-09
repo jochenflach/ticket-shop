@@ -86,6 +86,8 @@ export async function GET(request: Request) {
         number: seat.number,
         category: seat.category,
         price: seat.price,
+        x: seat.x,
+        y: seat.y,
         status,
         lockedBy,
         isMine,

@@ -413,10 +413,10 @@ export default function SellerPOS() {
               </div>
             ) : (
               <div className={styles.svgContainer}>
-                <svg viewBox="0 0 650 560" className={styles.svgSeatmap}>
+                <svg viewBox="0 0 1000 800" className={styles.svgSeatmap}>
                   {/* Stage */}
-                  <line x1="120" y1="35" x2="530" y2="35" stroke="var(--accent)" strokeWidth="6" strokeLinecap="round" />
-                  <text x="325" y="55" textAnchor="middle" className={styles.stageText}>BÜHNE</text>
+                  <line x1="300" y1="35" x2="700" y2="35" stroke="var(--accent)" strokeWidth="6" strokeLinecap="round" />
+                  <text x="500" y="55" textAnchor="middle" className={styles.stageText}>BÜHNE</text>
 
                   {/* Seats */}
                   {Object.entries(rows).map(([rowNumStr, rowSeats]) => {

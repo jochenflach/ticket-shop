@@ -669,19 +669,19 @@ function TicketShopContent() {
               </div>
             ) : (
               <div className={styles.svgContainer}>
-                <svg viewBox="0 0 650 560" className={styles.svgSeatmap}>
+                <svg viewBox="0 0 1000 800" className={styles.svgSeatmap}>
                   {/* Stage (Bühne) */}
                   <line 
-                    x1="120" 
+                    x1="300" 
                     y1="35" 
-                    x2="530" 
+                    x2="700" 
                     y2="35" 
                     stroke="var(--accent)" 
                     strokeWidth="8" 
                     strokeLinecap="round"
                     className={styles.stagePath}
                   />
-                  <text x="325" y="55" textAnchor="middle" className={styles.stageText}>BÜHNE</text>
+                  <text x="500" y="55" textAnchor="middle" className={styles.stageText}>BÜHNE</text>
 
                   {/* Render Rows and Seats */}
                   {Object.entries(rows).map(([rowNumStr, rowSeats]) => {
