@@ -67,7 +67,7 @@ export default function SeatmapEditor() {
       rowPrefix: 'A',
       rows: 6,
       seatsPerRow: 20,
-      startX: 40,
+      startX: 250,
       startY: 106,
       category: 'KAT1',
       price: 40.0,
@@ -79,7 +79,7 @@ export default function SeatmapEditor() {
       rowPrefix: 'B',
       rows: 10,
       seatsPerRow: 20,
-      startX: 40,
+      startX: 250,
       startY: 282,
       category: 'KAT2',
       price: 24.0,
@@ -172,6 +172,19 @@ export default function SeatmapEditor() {
       const data = await response.json();
       if (response.ok && data.layouts) {
         setLayouts(data.layouts);
+        
+        // Auto-load default-layout from the DB to sync saved positions on load/refresh
+        const defaultLayout = data.layouts.find((l: any) => l.id === 'default-layout');
+        if (defaultLayout && selectedLayoutId === 'default-layout') {
+          try {
+            const parsed = JSON.parse(defaultLayout.blocks);
+            setBlocks(parsed);
+            setLayoutName(defaultLayout.name);
+            setSelectedBlockId(parsed[0]?.id || null);
+          } catch (e) {
+            console.error('Error parsing default-layout:', e);
+          }
+        }
       }
     } catch (err) {
       console.error('Error fetching layouts:', err);
