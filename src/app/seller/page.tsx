@@ -454,6 +454,39 @@ export default function SellerPOS() {
                       <line x1={stageX1} y1={stageY} x2={stageX2} y2={stageY} stroke="var(--accent)" strokeWidth="6" strokeLinecap="round" />
                       <text x={(stageX1 + stageX2) / 2} y={stageTextY} textAnchor="middle" className={styles.stageText}>BÜHNE</text>
 
+                      {/* Render Block Labels */}
+                      {(() => {
+                        const blockMap: { [key: string]: Seat[] } = {};
+                        seats.forEach((seat) => {
+                          const blockName = getBlockNameFromSeatId(seat.id);
+                          if (blockName) {
+                            if (!blockMap[blockName]) blockMap[blockName] = [];
+                            blockMap[blockName].push(seat);
+                          }
+                        });
+
+                        return Object.entries(blockMap).map(([blockName, blockSeats]) => {
+                          const firstRowSeats = blockSeats.filter(s => s.row === 1);
+                          if (firstRowSeats.length === 0) return null;
+
+                          const minX = Math.min(...blockSeats.map(s => s.x));
+                          const minY = Math.min(...firstRowSeats.map(s => s.y));
+                          const sampleSeat = blockSeats[0];
+                          const categoryLabel = sampleSeat.category === 'KAT1' ? 'Premium' : 'Standard';
+
+                          return (
+                            <text
+                              key={`label-${blockName}`}
+                              x={minX}
+                              y={minY - 14}
+                              className={styles.blockLabelText}
+                            >
+                              {blockName} ({categoryLabel}, {sampleSeat.price.toFixed(2)} €)
+                            </text>
+                          );
+                        });
+                      })()}
+
                       {/* Seats */}
                       {Object.entries(rows).map(([rowNumStr, rowSeats]) => {
                         const rowNum = parseInt(rowNumStr);
