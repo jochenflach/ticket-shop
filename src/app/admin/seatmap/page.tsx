@@ -25,6 +25,7 @@ interface Block {
   category: 'KAT1' | 'KAT2';
   price: number;
   curvature: number;
+  hasAisle?: boolean;
 }
 
 interface GeneratedSeat {
@@ -69,6 +70,7 @@ export default function SeatmapEditor() {
       category: 'KAT1',
       price: 40.0,
       curvature: -0.18,
+      hasAisle: true,
     },
     {
       id: 'B',
@@ -80,6 +82,7 @@ export default function SeatmapEditor() {
       category: 'KAT2',
       price: 24.0,
       curvature: 0,
+      hasAisle: true,
     }
   ]);
 
@@ -207,7 +210,8 @@ export default function SeatmapEditor() {
     for (let r = 0; r < block.rows; r++) {
       for (let s = 0; s < block.seatsPerRow; s++) {
         const isRightSide = s >= block.seatsPerRow / 2;
-        const xOffset = s * seatSpacing + (isRightSide ? 22 : 0);
+        // Apply center aisle gap only if hasAisle is true (default to true for legacy blocks)
+        const xOffset = s * seatSpacing + (((block.hasAisle ?? true) && isRightSide) ? 22 : 0);
         let yOffset = r * rowSpacing;
 
         if (block.curvature !== 0) {
@@ -252,6 +256,7 @@ export default function SeatmapEditor() {
       category: 'KAT2',
       price: 24.0,
       curvature: 0,
+      hasAisle: false, // New blocks do not have an aisle by default
     };
 
     setBlocks([...blocks, newBlock]);
@@ -558,10 +563,10 @@ export default function SeatmapEditor() {
 
               {/* Render Blocks */}
               {blocks.map((block) => {
-                const blockSeats = getSeatsInBlock(block);
                 const seatSpacing = 24;
                 const rowSpacing = 26;
-                const width = (block.seatsPerRow - 1) * seatSpacing + 18 + (block.seatsPerRow > 1 ? 22 : 0);
+                const blockSeats = getSeatsInBlock(block);
+                const width = (block.seatsPerRow - 1) * seatSpacing + 18 + (((block.hasAisle ?? true) && block.seatsPerRow > 1) ? 22 : 0);
                 const height = (block.rows - 1) * rowSpacing + 18 + (block.curvature !== 0 ? Math.pow((block.seatsPerRow - 1) / 2, 2) * Math.abs(block.curvature) : 0);
 
                 const isSelected = selectedBlockId === block.id;
@@ -724,6 +729,19 @@ export default function SeatmapEditor() {
                   value={selectedBlock.seatsPerRow} 
                   onChange={(e) => handleUpdateBlockProperty('seatsPerRow', parseInt(e.target.value) || 1)}
                 />
+              </div>
+
+              <div className={styles.formGroup} style={{ flexDirection: 'row', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', marginTop: '0.25rem', marginBottom: '0.25rem' }}>
+                <input 
+                  type="checkbox" 
+                  id="hasAisle"
+                  checked={selectedBlock.hasAisle ?? false} 
+                  onChange={(e) => handleUpdateBlockProperty('hasAisle', e.target.checked)}
+                  style={{ width: '18px', height: '18px', margin: 0, cursor: 'pointer' }}
+                />
+                <label htmlFor="hasAisle" style={{ margin: 0, cursor: 'pointer', textTransform: 'none', fontSize: '0.85rem', fontWeight: 600 }}>
+                  Mittelgang einfügen
+                </label>
               </div>
 
               <div className={styles.formGroup}>
