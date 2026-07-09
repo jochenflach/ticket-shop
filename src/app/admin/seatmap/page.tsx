@@ -656,6 +656,10 @@ export default function SeatmapEditor() {
                 const width = (block.seatsPerRow - 1) * seatSpacing + 18 + (((block.hasAisle ?? true) && block.seatsPerRow > 1) ? 22 : 0);
                 const height = (block.rows - 1) * rowSpacing + 18 + (block.curvature !== 0 ? Math.pow((block.seatsPerRow - 1) / 2, 2) * Math.abs(block.curvature) : 0);
 
+                // Dynamically offset the title if the top row is curved upwards (negative curvature)
+                const maxUpwardCurve = block.curvature < 0 ? Math.pow((block.seatsPerRow - 1) / 2, 2) * block.curvature : 0;
+                const titleY = block.startY + maxUpwardCurve - 18;
+
                 const isSelected = selectedBlockId === block.id;
 
                 return (
@@ -677,7 +681,7 @@ export default function SeatmapEditor() {
                       className={styles.blockRect} 
                     />
                     
-                    <text x={block.startX} y={block.startY - 18} className={styles.blockLabelText}>
+                    <text x={block.startX} y={titleY} className={styles.blockLabelText}>
                       Block {block.id} ({block.category === 'KAT1' ? 'Premium' : 'Standard'}, {block.price.toFixed(2)} €, {block.rows * block.seatsPerRow} Plätze)
                     </text>
 
