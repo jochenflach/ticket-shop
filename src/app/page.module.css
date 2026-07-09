@@ -382,7 +382,7 @@
 }
 
 .ticketsList {
-  max-height: 250px;
+  max-height: 480px;
   overflow-y: auto;
   margin-bottom: 1.25rem;
   padding-right: 0.25rem;

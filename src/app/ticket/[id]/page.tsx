@@ -5,6 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { Printer, Calendar, MapPin, ArrowLeft, Loader2, Award, Heart, HelpCircle } from 'lucide-react';
 import QRCode from 'qrcode';
 import styles from './ticket.module.css';
+import { getBlockNameFromSeatId } from '@/lib/utils';
 
 interface Seat {
   id: string;
@@ -164,6 +165,10 @@ export default function TicketPrintPage() {
                 </div>
 
                 <div className={styles.detailRow}>
+                  <div className={styles.detailItem}>
+                    <span className={styles.label}>Block</span>
+                    <span className={styles.valueBig}>{getBlockNameFromSeatId(ticket.seat.id).replace('Block ', '')}</span>
+                  </div>
                   <div className={styles.detailItem}>
                     <span className={styles.label}>Reihe</span>
                     <span className={styles.valueBig}>{ticket.seat.row}</span>

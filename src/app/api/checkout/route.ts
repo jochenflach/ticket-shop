@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import Stripe from 'stripe';
+import { getBlockNameFromSeatId } from '@/lib/utils';
 
 const stripe = process.env.STRIPE_SECRET_KEY
   ? new Stripe(process.env.STRIPE_SECRET_KEY)
@@ -212,7 +213,7 @@ export async function POST(request: Request) {
           price_data: {
             currency: 'eur',
             product_data: {
-              name: `Musical Ticket: Reihe ${seat.row}, Platz ${seat.number}`,
+              name: `Musical Ticket: ${getBlockNameFromSeatId(seat.id)}, Reihe ${seat.row}, Platz ${seat.number}`,
               description: `Kategorie: ${seat.category} (Tarif: ${type})`,
             },
             unit_amount: Math.round(seatPrice * 100), // Stripe uses cents

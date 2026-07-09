@@ -3,6 +3,7 @@
 import { useState, useRef } from 'react';
 import { ShieldAlert, CheckCircle, AlertTriangle, XCircle, Search, Loader2, ArrowRight, ClipboardList } from 'lucide-react';
 import styles from './scan.module.css';
+import { getBlockNameFromSeatId } from '@/lib/utils';
 
 interface ScanResult {
   success: boolean;
@@ -143,7 +144,7 @@ export default function TicketScanner() {
                     <div className={styles.metaRow}>
                       <span className={styles.metaLabel}>Sitzplatz:</span>
                       <span className={styles.metaValueHighlight}>
-                        Reihe {result.row}, Platz {result.number}
+                        {result.seatId ? getBlockNameFromSeatId(result.seatId) + ', ' : ''}Reihe {result.row}, Platz {result.number}
                       </span>
                     </div>
                     <div className={styles.metaRow}>
@@ -169,7 +170,7 @@ export default function TicketScanner() {
                     <div className={styles.metaRow}>
                       <span className={styles.metaLabel}>Sitzplatz:</span>
                       <span className={styles.metaValueHighlight}>
-                        Reihe {result.row}, Platz {result.number}
+                        {result.seatId ? getBlockNameFromSeatId(result.seatId) + ', ' : ''}Reihe {result.row}, Platz {result.number}
                       </span>
                     </div>
                   </div>

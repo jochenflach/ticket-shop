@@ -4,6 +4,7 @@ import { useEffect, useState, useRef, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { Calendar, MapPin, Ticket, CreditCard, Loader2, Sparkles, ShieldCheck, Timer, Clock, ChevronRight, ArrowLeft } from 'lucide-react';
 import styles from './page.module.css';
+import { getBlockNameFromSeatId } from '@/lib/utils';
 
 // Type definitions
 interface Seat {
@@ -819,7 +820,7 @@ function TicketShopContent() {
                     return (
                       <div key={seat.id} className={styles.ticketItem}>
                         <div className={styles.ticketDetails}>
-                          <span className={styles.ticketTitle}>Reihe {seat.row}, Platz {seat.number}</span>
+                          <span className={styles.ticketTitle}>{getBlockNameFromSeatId(seat.id)} — Reihe {seat.row}, Platz {seat.number}</span>
                           <span className={styles.ticketCategory} style={{ color: seat.category === 'KAT1' ? 'var(--cat-kat1)' : 'var(--cat-kat2)' }}>
                             {seat.category}
                           </span>

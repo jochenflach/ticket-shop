@@ -5,6 +5,7 @@ import { useSearchParams, useRouter } from 'next/navigation';
 import { CheckCircle2, Ticket, Printer, ArrowLeft, Loader2, Calendar, MapPin } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import styles from './success.module.css';
+import { getBlockNameFromSeatId } from '@/lib/utils';
 
 interface Seat {
   id: string;
@@ -129,7 +130,7 @@ function CheckoutSuccessContent() {
                     <div className={styles.ticketCardHeader}>
                       <Ticket size={24} className={styles.goldText} />
                       <div className={styles.ticketSeatInfo}>
-                        <span className={styles.seatNum}>Reihe {t.seat.row}, Platz {t.seat.number}</span>
+                        <span className={styles.seatNum}>{getBlockNameFromSeatId(t.seat.id)} — Reihe {t.seat.row}, Platz {t.seat.number}</span>
                         <span className={styles.seatCat}>{t.seat.category}</span>
                       </div>
                     </div>

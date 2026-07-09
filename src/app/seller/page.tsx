@@ -4,6 +4,7 @@ import { useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { Loader2, Ticket, Printer, Shield, Lock, LayoutGrid, DollarSign, Calendar, MapPin } from 'lucide-react';
 import styles from './seller.module.css';
+import { getBlockNameFromSeatId } from '@/lib/utils';
 
 interface Seat {
   id: string;
@@ -542,7 +543,7 @@ export default function SellerPOS() {
                     return (
                       <div key={seat.id} className={styles.ticketItem}>
                         <div className={styles.ticketDetails}>
-                          <span className={styles.ticketTitle}>Reihe {seat.row}, Platz {seat.number}</span>
+                           <span className={styles.ticketTitle}>{getBlockNameFromSeatId(seat.id)} — Reihe {seat.row}, Platz {seat.number}</span>
                           <span className={styles.ticketCategory} style={{ color: seat.category === 'KAT1' ? 'var(--cat-kat1)' : 'var(--cat-kat2)' }}>
                             {seat.category}
                           </span>
