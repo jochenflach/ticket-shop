@@ -222,12 +222,12 @@
 }
 
 .svgSeat {
-  transition: transform 0.1s ease;
+  transition: all 0.15s ease;
 }
 
 .svgSeat:hover {
-  transform: scale(1.1);
-  transform-origin: center;
+  stroke-width: 2.5px !important;
+  cursor: pointer;
 }
 
 .svgSeatFree {
