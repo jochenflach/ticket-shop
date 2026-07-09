@@ -36,7 +36,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Einige Sitzplätze sind ungültig.' }, { status: 400 });
     }
 
-    const originalTotal = seats.reduce((sum, s) => sum + s.price, 0);
+    const originalTotal = seats.reduce((sum: number, s) => sum + s.price, 0);
 
     // 4. Calculate discount
     let discountAmount = 0;

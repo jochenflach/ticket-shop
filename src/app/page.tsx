@@ -355,7 +355,7 @@ function TicketShopContent() {
 
   const selectedSeatsDetails = getSelectedSeatsDetails();
 
-  const baseTotal = selectedSeatsDetails.reduce((sum, seat) => {
+  const baseTotal = selectedSeatsDetails.reduce((sum: number, seat) => {
     const type = ticketTypes[seat.id] || 'NORMAL';
     return sum + calculateTicketPrice(seat.price, type);
   }, 0);

@@ -248,7 +248,7 @@ export default function SellerPOS() {
   };
 
   const selectedSeatsDetails = getSelectedSeatsDetails();
-  const totalPrice = selectedSeatsDetails.reduce((sum, seat) => {
+  const totalPrice = selectedSeatsDetails.reduce((sum: number, seat) => {
     const type = paymentMethod === 'FREE' ? 'FREE' : (ticketTypes[seat.id] || 'NORMAL');
     return sum + calculateTicketPrice(seat.price, type);
   }, 0);

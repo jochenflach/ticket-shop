@@ -46,7 +46,7 @@ export async function POST(request: Request) {
     }
 
     // Calculate total price based on selected ticket types
-    const totalAmount = seats.reduce((sum, seat) => {
+    const totalAmount = seats.reduce((sum: number, seat) => {
       let type = ticketTypes?.[seat.id] || 'NORMAL';
       // Safety: Customers cannot book 'FREE' tickets online
       if (source !== 'SELLER' && type === 'FREE') {
