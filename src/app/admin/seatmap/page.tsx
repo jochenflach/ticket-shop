@@ -667,11 +667,18 @@ export default function SeatmapEditor() {
                 const rowSpacing = 26;
                 const blockSeats = getSeatsInBlock(block);
                 const width = (block.seatsPerRow - 1) * seatSpacing + 18 + (((block.hasAisle ?? true) && block.seatsPerRow > 1) ? 22 : 0);
-                const height = (block.rows - 1) * rowSpacing + 18 + (block.curvature !== 0 ? Math.pow((block.seatsPerRow - 1) / 2, 2) * Math.abs(block.curvature) : 0);
 
                 // Dynamically offset the title if the top row is curved upwards (negative curvature)
                 const maxUpwardCurve = block.curvature < 0 ? Math.pow((block.seatsPerRow - 1) / 2, 2) * block.curvature : 0;
+                const maxDownwardCurve = block.curvature > 0 ? Math.pow((block.seatsPerRow - 1) / 2, 2) * block.curvature : 0;
+
                 const titleY = block.startY + maxUpwardCurve - 18;
+
+                // Calculate exact visual Y coordinates for the block border rectangle
+                const highestSeatY = block.startY + maxUpwardCurve;
+                const lowestSeatY = block.startY + (block.rows - 1) * rowSpacing + 16 + maxDownwardCurve;
+                const rectY = highestSeatY - 10;
+                const rectHeight = lowestSeatY - highestSeatY + 22;
 
                 const isSelected = selectedBlockId === block.id;
 
@@ -687,9 +694,9 @@ export default function SeatmapEditor() {
                   >
                     <rect 
                       x={block.startX - 10} 
-                      y={block.startY - 10} 
+                      y={rectY} 
                       width={width + 20} 
-                      height={height + 20} 
+                      height={rectHeight} 
                       rx="8"
                       className={styles.blockRect} 
                     />
