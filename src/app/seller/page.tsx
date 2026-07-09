@@ -466,11 +466,12 @@ export default function SellerPOS() {
                         });
 
                         return Object.entries(blockMap).map(([blockName, blockSeats]) => {
-                          const firstRowSeats = blockSeats.filter(s => s.row === 1);
-                          if (firstRowSeats.length === 0) return null;
+                           const minRowInBlock = Math.min(...blockSeats.map(s => s.row));
+                           const firstRowSeats = blockSeats.filter(s => s.row === minRowInBlock);
+                           if (firstRowSeats.length === 0) return null;
 
-                          const minX = Math.min(...blockSeats.map(s => s.x));
-                          const minY = Math.min(...firstRowSeats.map(s => s.y));
+                           const minX = Math.min(...blockSeats.map(s => s.x));
+                           const minY = Math.min(...firstRowSeats.map(s => s.y));
                           const sampleSeat = blockSeats[0];
                           const categoryLabel = sampleSeat.category === 'KAT1' ? 'Premium' : 'Standard';
 

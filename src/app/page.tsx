@@ -731,7 +731,8 @@ function TicketShopContent() {
                         });
 
                         return Object.entries(blockMap).map(([blockName, blockSeats]) => {
-                          const firstRowSeats = blockSeats.filter(s => s.row === 1);
+                          const minRowInBlock = Math.min(...blockSeats.map(s => s.row));
+                          const firstRowSeats = blockSeats.filter(s => s.row === minRowInBlock);
                           if (firstRowSeats.length === 0) return null;
 
                           const minX = Math.min(...blockSeats.map(s => s.x));
