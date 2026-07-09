@@ -91,6 +91,7 @@ export default function SeatmapEditor() {
   const [selectedBlockId, setSelectedBlockId] = useState<string | null>('A');
   const [snapToGrid, setSnapToGrid] = useState(true);
   const [showGrid, setShowGrid] = useState(true);
+  const [targetSeatsInput, setTargetSeatsInput] = useState('50');
 
   // Drag & drop state
   const [isDragging, setIsDragging] = useState(false);
@@ -274,11 +275,19 @@ export default function SeatmapEditor() {
       }
     }
 
+    const target = parseInt(targetSeatsInput) || 50;
+    
+    // Optimal proportion formula: rows = round(sqrt(target / 2)), seats = ceil(target / rows)
+    let calculatedRows = Math.round(Math.sqrt(target / 2));
+    calculatedRows = Math.max(1, Math.min(30, calculatedRows));
+    let calculatedSeatsPerRow = Math.ceil(target / calculatedRows);
+    calculatedSeatsPerRow = Math.max(1, Math.min(40, calculatedSeatsPerRow));
+
     const newBlock: Block = {
       id: nextId,
       rowPrefix: nextId,
-      rows: 4,
-      seatsPerRow: 10,
+      rows: calculatedRows,
+      seatsPerRow: calculatedSeatsPerRow,
       startX: 150,
       startY: 200,
       category: 'KAT2',
@@ -289,6 +298,7 @@ export default function SeatmapEditor() {
 
     setBlocks([...blocks, newBlock]);
     setSelectedBlockId(nextId);
+    setEditorSuccess(`Block ${nextId} mit ${calculatedRows} Reihen à ${calculatedSeatsPerRow} Sitzen (${calculatedRows * calculatedSeatsPerRow} Plätze) wurde generiert.`);
   };
 
   // Duplicate Block
@@ -585,6 +595,17 @@ export default function SeatmapEditor() {
               >
                 Magnetisch
               </button>
+              <div style={{ display: 'flex', alignItems: 'center', backgroundColor: '#f3f4f6', border: '1px solid #e5e7eb', borderRadius: '6px', padding: '0.15rem 0.4rem', gap: '0.25rem' }}>
+                <span style={{ fontSize: '0.75rem', color: '#4b5563', fontWeight: 600, paddingLeft: '0.25rem' }}>Plätze:</span>
+                <input
+                  type="number"
+                  min="1"
+                  max="1000"
+                  value={targetSeatsInput}
+                  onChange={(e) => setTargetSeatsInput(e.target.value)}
+                  style={{ width: '55px', height: '26px', border: '1px solid #d1d5db', borderRadius: '4px', textAlign: 'center', fontSize: '0.85rem', fontWeight: 600, padding: 0 }}
+                />
+              </div>
               <button onClick={handleAddBlock} className={styles.actionButton} style={{backgroundColor: '#090514', color: '#fff'}}>
                 <Plus size={15} />
                 Block hinzufügen
