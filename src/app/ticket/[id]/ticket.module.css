@@ -431,7 +431,7 @@
     color: #000000 !important;
     width: 100% !important;
     max-width: 190mm !important;
-    height: 75mm !important;
+    height: auto !important;
     display: flex !important;
     flex-direction: row !important;
   }
