@@ -520,3 +520,57 @@
   60% { opacity: 0.8; }
   100% { opacity: 0; }
 }
+
+@media (max-width: 480px) {
+  .main {
+    padding: 0 !important;
+    align-items: flex-start !important;
+    background: #090514 !important;
+  }
+
+  .container {
+    max-width: 100% !important;
+    border-radius: 0 !important;
+    border: none !important;
+    padding: 1.25rem 1rem !important;
+    box-shadow: none !important;
+    background: transparent !important;
+    min-height: 100vh !important;
+    display: flex !important;
+    flex-direction: column !important;
+  }
+
+  .header {
+    margin-bottom: 1.5rem !important;
+  }
+
+  .header h1 {
+    font-size: 1.4rem !important;
+  }
+
+  .cameraSection {
+    margin-bottom: 1.5rem !important;
+  }
+
+  .cameraBox {
+    border-radius: 10px !important;
+  }
+
+  .cameraViewportContainer {
+    aspect-ratio: 1 !important; /* Perfect square layout on mobile */
+  }
+
+  .scanTarget {
+    width: 70% !important;
+    height: 70% !important;
+  }
+
+  .resultCard {
+    padding: 1rem !important;
+    gap: 1rem !important;
+  }
+
+  .resultDetails h2 {
+    font-size: 1.1rem !important;
+  }
+}
