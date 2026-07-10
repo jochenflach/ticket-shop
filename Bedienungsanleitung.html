@@ -272,6 +272,50 @@
     </section>
 
     <section>
+      <h2>🔗 Übersicht der Web-Adressen (URLs)</h2>
+      <p>Hier finden Sie alle wichtigen Web-Adressen für den Betrieb des Ticketshops im Überblick.</p>
+      
+      <table>
+        <thead>
+          <tr>
+            <th style="width: 30%;">Bereich / Ansicht</th>
+            <th style="width: 35%;">A. Live-Betrieb (Online im Internet)</th>
+            <th style="width: 35%;">B. Offline-Betrieb (Lokaler Laptop-Server)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>🎟️ Ticketshop (Kundenansicht)</strong></td>
+            <td><a href="https://wondrous-gumdrop-b59508.netlify.app" target="_blank">wondrous-gumdrop-b59508.netlify.app</a></td>
+            <td><code>http://localhost:3000</code></td>
+          </tr>
+          <tr>
+            <td><strong>📊 Admin-Dashboard (Saalplan)</strong></td>
+            <td><a href="https://wondrous-gumdrop-b59508.netlify.app/admin" target="_blank">wondrous-gumdrop-b59508.netlify.app/admin</a></td>
+            <td><code>http://localhost:3000/admin</code></td>
+          </tr>
+          <tr>
+            <td><strong>🏪 Abendkasse (Kassen-Terminal)</strong></td>
+            <td><a href="https://wondrous-gumdrop-b59508.netlify.app/seller" target="_blank">wondrous-gumdrop-b59508.netlify.app/seller</a></td>
+            <td><code>http://localhost:3000/seller</code></td>
+          </tr>
+          <tr>
+            <td><strong>📷 Ticket-Scanner (Einlass)</strong></td>
+            <td><a href="https://wondrous-gumdrop-b59508.netlify.app/scan" target="_blank">wondrous-gumdrop-b59508.netlify.app/scan</a></td>
+            <td><code>http://[LAPTOP-IP]:3000/scan</code></td>
+          </tr>
+        </tbody>
+      </table>
+      
+      <div class="alert">
+        <div class="alert-icon">💡</div>
+        <div class="alert-content">
+          <p><strong>Hinweis zum Offline-Scanner:</strong> Für den Offline-Einlass müssen die Smartphones der Ticket-Scanner mit dem WLAN des Laptops verbunden werden. Rufen Sie auf den Scangeräten dann die Adresse <code>http://[LAPTOP-IP-ADRESSE]:3000/scan</code> auf (die genaue IP-Adresse des Laptops wird beim Starten der Batch-Datei im Terminalfenster angezeigt).</p>
+        </div>
+      </div>
+    </section>
+
+    <section>
       <h2>1. Einpflegen des Shops auf eine Webseite</h2>
       <p>Da der Ticketshop auf dem hochverfügbaren Servernetzwerk von <strong>Netlify</strong> gehostet wird, binden wir ihn per <strong>Iframe</strong> (Fenster-in-Fenster) auf Ihrer Strato-, Hostinger- oder WordPress-Webseite ein. Dadurch läuft der Shop direkt in Ihrem Design.</p>
       
