@@ -390,6 +390,11 @@
    PRINT MEDIA STYLES
    ========================================== */
 @media print {
+  @page {
+    size: portrait;
+    margin: 15mm 10mm 15mm 10mm;
+  }
+
   :global(body) {
     background: #ffffff !important;
     background-image: none !important;
@@ -404,6 +409,7 @@
     padding: 0 !important;
     min-height: auto !important;
     background: transparent !important;
+    display: block !important;
   }
 
   .noPrintActions {
@@ -411,22 +417,43 @@
   }
 
   .ticketContainer {
-    max-width: 100% !important;
-    margin: 0 !important;
+    width: 100% !important;
+    max-width: 190mm !important;
+    margin: 0 auto !important;
     padding: 0 !important;
   }
 
   .ticketLayout {
-    border: 3px solid #000000 !important;
+    border: 2px solid #000000 !important;
     box-shadow: none !important;
     border-radius: 0 !important;
     background: #ffffff !important;
     color: #000000 !important;
+    width: 100% !important;
+    max-width: 190mm !important;
+    height: 75mm !important;
+    display: flex !important;
+    flex-direction: row !important;
+  }
+
+  .ticketMain {
+    padding: 1.2rem !important;
+    gap: 1rem !important;
   }
 
   .ticketStub {
+    padding: 1.2rem !important;
     background: #ffffff !important;
     border-left: 2px dashed #000000 !important;
+    flex: 1 !important;
+  }
+
+  .qrCodeImage {
+    max-width: 110px !important;
+  }
+
+  .sponsorsImage {
+    max-width: 240px !important;
   }
 
   .perforation {

@@ -213,7 +213,13 @@ export default function TicketScanner() {
                   Kamera stoppen
                 </button>
               </div>
-              <div className={styles.cameraViewportContainer}>
+              <div className={`${styles.cameraViewportContainer} ${
+                result ? (
+                  result.success ? styles.borderSuccess : 
+                  result.alreadyCheckedIn ? styles.borderWarning : 
+                  styles.borderError
+                ) : ''
+              }`}>
                 <div id="qr-reader" className={styles.qrReader}></div>
                 <div className={styles.scanOverlay}>
                   <div className={`${styles.scanTarget} ${scanCooldown ? styles.paused : ''}`}></div>
