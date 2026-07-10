@@ -33,10 +33,12 @@ export default function TicketScanner() {
   const [result, setResult] = useState<ScanResult | null>(null);
   const [history, setHistory] = useState<ScanHistoryItem[]>([]);
   const [error, setError] = useState<string | null>(null);
-  const [showCamera, setShowCamera] = useState(false);
+  const [cameraActive, setCameraActive] = useState(false);
+  const [scanCooldown, setScanCooldown] = useState(false);
 
   const inputRef = useRef<HTMLInputElement>(null);
   const html5QrCodeRef = useRef<Html5Qrcode | null>(null);
+  const cooldownRef = useRef(false);
 
   // Clean up camera on unmount
   useEffect(() => {
@@ -111,11 +113,11 @@ export default function TicketScanner() {
   };
 
   const startCamera = () => {
-    setShowCamera(true);
+    setCameraActive(true);
     setError(null);
     setResult(null);
 
-    // Give React time to render the modal container
+    // Give React time to render the viewport container
     setTimeout(() => {
       try {
         const html5QrCode = new Html5Qrcode("qr-reader");
@@ -126,27 +128,40 @@ export default function TicketScanner() {
           {
             fps: 10,
             qrbox: (width, height) => {
-              const size = Math.min(width, height) * 0.7;
+              const size = Math.min(width, height) * 0.75;
               return { width: size, height: size };
             }
           },
           async (decodedText) => {
-            // Scanner success
-            await stopCamera();
+            // Check if in cooldown
+            if (cooldownRef.current) return;
+            
+            // Set cooldown
+            cooldownRef.current = true;
+            setScanCooldown(true);
+
+            // Process scan
             await scanTicket(decodedText);
+
+            // Cooldown timeout: 2.2 seconds before resetting to active scan mode
+            setTimeout(() => {
+              cooldownRef.current = false;
+              setScanCooldown(false);
+              setResult(null); // Clear result card to indicate ready for next ticket
+            }, 2200);
           },
           (errorMessage) => {
-            // Keep scanning, ignore silent errors
+            // Keep scanning
           }
         ).catch(err => {
           console.error("Camera start error:", err);
           setError("Kamera konnte nicht gestartet werden. Bitte Berechtigungen prüfen.");
-          setShowCamera(false);
+          setCameraActive(false);
         });
       } catch (err) {
         console.error("Scanner init error:", err);
         setError("Fehler bei der Kamera-Initialisierung.");
-        setShowCamera(false);
+        setCameraActive(false);
       }
     }, 200);
   };
@@ -162,7 +177,9 @@ export default function TicketScanner() {
       }
       html5QrCodeRef.current = null;
     }
-    setShowCamera(false);
+    setCameraActive(false);
+    setScanCooldown(false);
+    cooldownRef.current = false;
   };
 
   return (
@@ -175,7 +192,38 @@ export default function TicketScanner() {
           <p className={styles.subtitle}>Einlass-Scanner für das Musical <strong>"Das Wilde Weib"</strong></p>
         </div>
 
-        {/* Input Form */}
+        {/* Camera Section */}
+        <div className={styles.cameraSection}>
+          {!cameraActive ? (
+            <button type="button" className={styles.activateCameraButton} onClick={startCamera}>
+              <Camera size={18} className={styles.cameraIcon} />
+              Kamera-Scanner starten
+            </button>
+          ) : (
+            <div className={styles.cameraBox}>
+              <div className={styles.cameraHeader}>
+                <span className={styles.cameraStatus}>
+                  {scanCooldown ? (
+                    <span className={styles.statusCooldown}>Pausiert... (Nächstes Ticket)</span>
+                  ) : (
+                    <span className={styles.statusScanning}>Scannen aktiv...</span>
+                  )}
+                </span>
+                <button type="button" className={styles.stopCameraButton} onClick={stopCamera}>
+                  Kamera stoppen
+                </button>
+              </div>
+              <div className={styles.cameraViewportContainer}>
+                <div id="qr-reader" className={styles.qrReader}></div>
+                <div className={styles.scanOverlay}>
+                  <div className={`${styles.scanTarget} ${scanCooldown ? styles.paused : ''}`}></div>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Input Form for Manual Entry */}
         <form onSubmit={handleScan} className={styles.scanForm}>
           <div className={styles.inputWrapper}>
             <Search size={20} className={styles.searchIcon} />
@@ -183,48 +231,17 @@ export default function TicketScanner() {
               ref={inputRef}
               type="text"
               required
-              placeholder="Ticket-Code scannen oder eintippen"
+              placeholder="Code manuell eingeben"
               value={ticketCode}
               onChange={(e) => setTicketCode(e.target.value)}
-              disabled={loading || showCamera}
+              disabled={loading}
               autoComplete="off"
-              autoFocus
             />
-            <button 
-              type="button" 
-              className={styles.cameraButton} 
-              onClick={startCamera} 
-              disabled={loading || showCamera}
-              title="Kamera-Scanner starten"
-            >
-              <Camera size={18} />
-            </button>
-            <button type="submit" className={styles.submitButton} disabled={loading || showCamera}>
+            <button type="submit" className={styles.submitButton} disabled={loading}>
               {loading ? <Loader2 size={18} className={styles.spinner} /> : <ArrowRight size={18} />}
             </button>
           </div>
         </form>
-
-        {/* Camera Modal Viewport */}
-        {showCamera && (
-          <div className={styles.cameraModal}>
-            <div className={styles.cameraContent}>
-              <div className={styles.cameraHeader}>
-                <h3>Kamera-Scanner</h3>
-                <button type="button" onClick={stopCamera} className={styles.closeCameraButton} title="Scanner schließen">
-                  <X size={18} />
-                </button>
-              </div>
-              <div className={styles.cameraViewportContainer}>
-                <div id="qr-reader" className={styles.qrReader}></div>
-                <div className={styles.scanOverlay}>
-                  <div className={styles.scanTarget}></div>
-                </div>
-              </div>
-              <p className={styles.cameraHint}>Halten Sie den QR-Code des Tickets in das Quadrat.</p>
-            </div>
-          </div>
-        )}
 
         {error && <div className={styles.errorAlert}>{error}</div>}
 

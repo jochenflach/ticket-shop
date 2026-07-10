@@ -73,7 +73,7 @@
 
 .inputWrapper input {
   width: 100%;
-  padding: 1rem 6rem 1rem 3rem;
+  padding: 1rem 3.5rem 1rem 3rem;
   border: none;
   background: transparent;
   color: white;
@@ -297,99 +297,97 @@
   opacity: 0.8;
 }
 
-/* Camera button in inputWrapper */
-.cameraButton {
-  position: absolute;
-  right: 3rem;
-  background: rgba(255, 255, 255, 0.05);
-  color: var(--text-muted);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  width: 36px;
-  height: 36px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  transition: all 0.2s;
-  cursor: pointer;
-}
-
-.cameraButton:hover:not(:disabled) {
-  background: rgba(255, 255, 255, 0.1);
-  color: var(--text);
-  transform: scale(1.05);
-}
-
-.cameraButton:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-/* Camera Modal Overlay */
-.cameraModal {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(9, 5, 20, 0.95);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 1000;
-  padding: 1.5rem;
-  animation: fadeIn 0.2s ease-out;
-}
-
-.cameraContent {
+/* Camera Section */
+.cameraSection {
+  margin-bottom: 2rem;
   width: 100%;
-  max-width: 450px;
-  background: #150f24;
+}
+
+.activateCameraButton {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.5rem;
+  background: var(--primary);
+  color: #090514;
+  border: none;
+  border-radius: 10px;
+  padding: 1rem;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 4px 15px rgba(217, 119, 6, 0.2);
+}
+
+.activateCameraButton:hover {
+  background: var(--primary-hover);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(217, 119, 6, 0.3);
+}
+
+.cameraBox {
+  background: rgba(0, 0, 0, 0.3);
   border: 1px solid var(--border);
-  border-radius: 16px;
-  padding: 1.5rem;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+  border-radius: 14px;
+  overflow: hidden;
   display: flex;
   flex-direction: column;
-  gap: 1rem;
 }
 
 .cameraHeader {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  padding: 0.75rem 1rem;
+  background: rgba(255, 255, 255, 0.03);
+  border-bottom: 1px solid var(--border);
 }
 
-.cameraHeader h3 {
-  font-size: 1.1rem;
-  font-weight: 700;
-  color: white;
+.cameraStatus {
+  font-size: 0.85rem;
+  font-weight: 600;
 }
 
-.closeCameraButton {
+.statusScanning {
+  color: #34d399;
+}
+
+.statusCooldown {
+  color: #fbbf24;
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  0% { opacity: 0.6; }
+  50% { opacity: 1; }
+  100% { opacity: 0.6; }
+}
+
+.stopCameraButton {
   background: transparent;
-  color: var(--text-muted);
-  border: none;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  color: #fca5a5;
+  padding: 0.35rem 0.75rem;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 600;
   cursor: pointer;
-  padding: 0.25rem;
-  transition: color 0.2s;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  transition: all 0.2s;
 }
 
-.closeCameraButton:hover {
-  color: white;
+.stopCameraButton:hover {
+  background: rgba(239, 68, 68, 0.1);
+  border-color: rgba(239, 68, 68, 0.5);
 }
 
 .cameraViewportContainer {
   position: relative;
   width: 100%;
-  aspect-ratio: 1;
+  aspect-ratio: 1.25;
   background: #000;
-  border-radius: 12px;
   overflow: hidden;
-  border: 1px solid var(--border);
 }
 
 .qrReader {
@@ -416,12 +414,13 @@
 }
 
 .scanTarget {
-  width: 60%;
+  width: 50%;
   height: 60%;
   border: 2px dashed var(--primary);
   border-radius: 8px;
   box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.5);
   position: relative;
+  transition: border-color 0.3s;
 }
 
 .scanTarget::after {
@@ -434,6 +433,16 @@
   background: var(--primary);
   box-shadow: 0 0 8px var(--primary);
   animation: scanMove 2s linear infinite;
+}
+
+.scanTarget.paused {
+  border-color: rgba(255, 255, 255, 0.15);
+}
+
+.scanTarget.paused::after {
+  animation-play-state: paused;
+  background: rgba(255, 255, 255, 0.2);
+  box-shadow: none;
 }
 
 @keyframes scanMove {
