@@ -30,6 +30,19 @@ interface PromoCode {
   createdAt: string;
 }
 
+interface TicketSeat {
+  category: string;
+  price: number;
+}
+
+interface EventTicket {
+  id: string;
+  ticketType: string;
+  pricePaid: number;
+  checkedIn: boolean;
+  seat: TicketSeat;
+}
+
 interface EventDB {
   id: string;
   title: string;
@@ -39,6 +52,7 @@ interface EventDB {
   layout: {
     name: string;
   };
+  tickets?: EventTicket[];
 }
 
 interface LayoutDB {
@@ -57,6 +71,7 @@ export default function AdminDashboard() {
   const [promoCodes, setPromoCodes] = useState<PromoCode[]>([]);
   const [events, setEvents] = useState<EventDB[]>([]);
   const [layouts, setLayouts] = useState<LayoutDB[]>([]);
+  const [selectedEventId, setSelectedEventId] = useState<string>('all');
 
   // Promo Code Form state
   const [newCode, setNewCode] = useState('');
@@ -347,9 +362,38 @@ export default function AdminDashboard() {
     );
   }
 
-  // ==========================================
-  // VIEW: Authorized dashboard
-  // ==========================================
+  // Filter events for stats
+  const filteredEvents = selectedEventId === 'all' 
+    ? events 
+    : events.filter(e => e.id === selectedEventId);
+
+  // Calculate stats
+  let totalSold = 0;
+  let totalScanned = 0;
+  let totalRevenue = 0;
+  let cat1Sold = 0;
+  let cat2Sold = 0;
+  let normalCount = 0;
+  let studentCount = 0;
+  let childCount = 0;
+  let freeCount = 0;
+
+  filteredEvents.forEach(e => {
+    (e.tickets || []).forEach(t => {
+      totalSold++;
+      if (t.checkedIn) totalScanned++;
+      totalRevenue += t.pricePaid;
+      
+      if (t.seat?.category === 'KAT1') cat1Sold++;
+      if (t.seat?.category === 'KAT2') cat2Sold++;
+      
+      if (t.ticketType === 'NORMAL') normalCount++;
+      else if (t.ticketType === 'STUDENT') studentCount++;
+      else if (t.ticketType === 'CHILD') childCount++;
+      else if (t.ticketType === 'FREE') freeCount++;
+    });
+  });
+
   return (
     <main className={styles.adminContainer}>
       <div className={styles.glowingBackground}></div>
@@ -371,6 +415,79 @@ export default function AdminDashboard() {
           </button>
         </div>
       </header>
+
+      {/* Dashboard Section */}
+      {events.length > 0 && (
+        <section className={`${styles.card} glass`} style={{ marginBottom: '2rem', padding: '1.5rem' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
+            <h2 style={{ fontSize: '1.3rem', fontWeight: '700', margin: 0, border: 'none', padding: 0 }}>📊 Ticket-Statistiken</h2>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Auswahl:</span>
+              <select
+                value={selectedEventId}
+                onChange={(e) => setSelectedEventId(e.target.value)}
+                style={{ 
+                  backgroundColor: '#090514', 
+                  color: 'white', 
+                  border: '1px solid var(--border)', 
+                  borderRadius: '6px', 
+                  padding: '0.35rem 0.75rem', 
+                  fontSize: '0.85rem',
+                  cursor: 'pointer',
+                  outline: 'none'
+                }}
+              >
+                <option value="all">Alle Vorstellungen zusammen</option>
+                {events.map(e => (
+                  <option key={e.id} value={e.id}>{e.title} ({new Date(e.date).toLocaleDateString('de-DE')})</option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1.25rem' }}>
+            {/* Stat Card 1: Tickets Sold */}
+            <div style={{ background: 'rgba(255, 255, 255, 0.02)', padding: '1.25rem', borderRadius: '10px', border: '1px solid var(--border)', display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
+              <span style={{ fontSize: '0.72rem', fontWeight: '700', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Verkaufte Tickets</span>
+              <span style={{ fontSize: '2rem', fontWeight: '800', color: '#38bdf8', lineHeight: 1.2 }}>{totalSold}</span>
+              <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Erfolgreich bezahlte Buchungen</span>
+            </div>
+
+            {/* Stat Card 2: Revenue */}
+            <div style={{ background: 'rgba(255, 255, 255, 0.02)', padding: '1.25rem', borderRadius: '10px', border: '1px solid var(--border)', display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
+              <span style={{ fontSize: '0.72rem', fontWeight: '700', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Gesamteinnahmen</span>
+              <span style={{ fontSize: '2rem', fontWeight: '800', color: '#34d399', lineHeight: 1.2 }}>{totalRevenue.toFixed(2)} €</span>
+              <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Nach Abzug aller Rabattcodes</span>
+            </div>
+
+            {/* Stat Card 3: Check-in Status */}
+            <div style={{ background: 'rgba(255, 255, 255, 0.02)', padding: '1.25rem', borderRadius: '10px', border: '1px solid var(--border)', display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
+              <span style={{ fontSize: '0.72rem', fontWeight: '700', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Einlass-Status</span>
+              <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.35rem' }}>
+                <span style={{ fontSize: '2rem', fontWeight: '800', color: '#fbbf24', lineHeight: 1.2 }}>
+                  {totalSold > 0 ? Math.round((totalScanned / totalSold) * 100) : 0}%
+                </span>
+                <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>gescannt</span>
+              </div>
+              <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                {totalScanned} von {totalSold} Tickets eingecheckt
+              </span>
+            </div>
+
+            {/* Stat Card 4: Categories Breakdown */}
+            <div style={{ background: 'rgba(255, 255, 255, 0.02)', padding: '1.25rem', borderRadius: '10px', border: '1px solid var(--border)', display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
+              <span style={{ fontSize: '0.72rem', fontWeight: '700', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Kategorie-Übersicht</span>
+              <div style={{ display: 'flex', gap: '1rem', fontSize: '0.9rem', color: 'white', fontWeight: '700', marginTop: '0.1rem' }}>
+                <div>KAT1: <span style={{ color: 'var(--cat-kat1)' }}>{cat1Sold}</span></div>
+                <div>KAT2: <span style={{ color: 'var(--cat-kat2)' }}>{cat2Sold}</span></div>
+              </div>
+              <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>
+                Tarife: {normalCount}x Norm / {studentCount}x Stud / {childCount}x Kind / {freeCount}x Frei
+              </span>
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* Row 1: Events Section */}
       <div className={styles.grid} style={{ marginBottom: '2.5rem' }}>

@@ -19,6 +19,21 @@ export async function GET(request: Request) {
       include: {
         layout: {
           select: { name: true }
+        },
+        tickets: {
+          where: {
+            order: {
+              status: 'PAID'
+            }
+          },
+          include: {
+            seat: {
+              select: {
+                category: true,
+                price: true
+              }
+            }
+          }
         }
       },
       orderBy: { date: 'asc' },
