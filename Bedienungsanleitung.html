@@ -419,7 +419,25 @@ SELLER_PIN="IhreNeueSellerPin"</code></pre>
       <h2>4. Bedienung des Admin-Dashboards</h2>
       <p>Das Admin-Dashboard erreichen Sie unter <code>https://ihre-seite.netlify.app/admin</code> (bzw. offline unter <code>http://localhost:3000/admin</code>).</p>
       
-      <h3>Gutscheincodes anlegen und verwalten:</h3>
+      <h3>📊 4.1 Live-Ticket-Statistiken (Echtzeit-Dashboard)</h3>
+      <p>Nach Eingabe der Admin-PIN sehen Sie im oberen Bereich eine detaillierte Zusammenfassung aller Ticket-Verkäufe:</p>
+      <ul>
+        <li><strong>Vorstellungs-Filter:</strong> Nutzen Sie das Dropdown-Menü oben rechts im Statistik-Bereich, um die Auslastung einer einzelnen Vorstellung zu analysieren oder die kumulierten Werte aller Vorstellungen anzuzeigen.</li>
+        <li><strong>Verkaufte Tickets:</strong> Die Anzahl aller Tickets mit erfolgreich bezahlter Buchung.</li>
+        <li><strong>Gesamteinnahmen:</strong> Der bis zu diesem Zeitpunkt generierte Umsatz in Euro (berechnet nach Abzug aller Rabattcodes).</li>
+        <li><strong>Einlass-Status:</strong> Der Fortschritt des Einlasses (wie viele Tickets bereits am Einlass-Scanner eingecheckt wurden).</li>
+        <li><strong>Kategorie- & Tarifübersicht:</strong> Eine Aufsplittung der Ticketverkäufe nach Kategorien (KAT1 / KAT2) und den verschiedenen Preistarifen (Normal, Student, Kind, Freikarte).</li>
+      </ul>
+
+      <h3>📅 4.2 Veranstaltungen verwalten & zurücksetzen</h3>
+      <p>Sie können beliebig viele Vorstellungen hinzufügen und deren Belegungen steuern:</p>
+      <ul>
+        <li><strong>Vorstellung anlegen:</strong> Nutzen Sie das linke Formular "Veranstaltung anlegen". Geben Sie den Titel der Vorstellung, das Datum mit Uhrzeit und den Saalplan an. Nach dem Klick auf "Termin anlegen" ist die Vorstellung live buchbar.</li>
+        <li><strong>Vorstellung löschen:</strong> Klicken Sie in der Tabelle auf das rote Mülleimer-Symbol. Dies ist zum Schutz der Kunden nur möglich, wenn noch kein Ticket für diese Vorstellung gebucht wurde.</li>
+        <li><strong>Vorstellung zurücksetzen (Testbetrieb):</strong> Klicken Sie in der Tabelle auf das orangefarbene <strong>Kreispfeil-Symbol (Zurücksetzen)</strong>. Nach Bestätigung der Warnung werden alle getätigten Käufe, Buchungsdaten und Sperren für diese Vorstellung gelöscht. Der Saalplan ist sofort wieder vollständig frei.</li>
+      </ul>
+
+      <h3>🏷️ 4.3 Gutscheincodes anlegen und verwalten</h3>
       <p>Sie können flexibel Gutscheincodes erstellen, um Rabatte zu gewähren. Das System unterstützt zwei Gutschein-Typen:</p>
       
       <table>
