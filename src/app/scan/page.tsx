@@ -126,11 +126,7 @@ export default function TicketScanner() {
         html5QrCode.start(
           { facingMode: "environment" }, // Rear camera
           {
-            fps: 10,
-            qrbox: (width, height) => {
-              const size = Math.min(width, height) * 0.75;
-              return { width: size, height: size };
-            }
+            fps: 15,
           },
           async (decodedText) => {
             // Check if in cooldown

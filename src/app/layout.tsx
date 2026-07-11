@@ -20,6 +20,13 @@ export const metadata: Metadata = {
   keywords: ['Musical', 'Das Wilde Weib', 'Ticketshop', 'Saalplanbuchung', 'Tickets', 'Karten', 'Kultur'],
 };
 
+export const viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+};
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -28,6 +35,7 @@ export default function RootLayout({
   return (
     <html lang="de" className={`${cinzelDeco.variable} ${inter.variable}`}>
       <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
         <meta name="theme-color" content="#120c1f" />
       </head>
       <body>{children}</body>
