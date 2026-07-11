@@ -390,12 +390,8 @@
   overflow: hidden;
 }
 
-.qrReader {
-  width: 100%;
-  height: 100%;
-}
-
-.qrReader video {
+.qrReader,
+.qrReader * {
   width: 100% !important;
   height: 100% !important;
   object-fit: cover !important;
@@ -521,7 +517,7 @@
   100% { opacity: 0; }
 }
 
-@media (max-width: 480px) {
+@media (max-width: 768px) {
   .main {
     padding: 0 !important;
     align-items: flex-start !important;
