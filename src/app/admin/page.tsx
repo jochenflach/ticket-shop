@@ -90,6 +90,36 @@ export default function AdminDashboard() {
   const [eventFormError, setEventFormError] = useState<string | null>(null);
   const [eventFormSuccess, setEventFormSuccess] = useState(false);
 
+  // Custom Modal State & Helpers
+  const [modalConfig, setModalConfig] = useState<{
+    title: string;
+    message: string;
+    isWarning?: boolean;
+    onConfirm: () => void;
+    onCancel?: () => void;
+  } | null>(null);
+
+  const customConfirm = (title: string, message: string, onConfirm: () => void, isWarning = false) => {
+    setModalConfig({
+      title,
+      message,
+      isWarning,
+      onConfirm,
+      onCancel: () => setModalConfig(null)
+    });
+  };
+
+  const customAlert = (title: string, message: string, onConfirm?: () => void) => {
+    setModalConfig({
+      title,
+      message,
+      onConfirm: () => {
+        if (onConfirm) onConfirm();
+        setModalConfig(null);
+      }
+    });
+  };
+
   // Load PIN from sessionStorage if exists
   useEffect(() => {
     const storedPin = sessionStorage.getItem('admin_session_pin');
@@ -208,25 +238,30 @@ export default function AdminDashboard() {
   };
 
   const handleDeletePromo = async (id: string) => {
-    if (!confirm('Möchten Sie diesen Rabattcode wirklich löschen?')) return;
-    const activePin = pin || sessionStorage.getItem('admin_session_pin') || '';
+    customConfirm(
+      'Rabattcode löschen',
+      'Möchten Sie diesen Rabattcode wirklich unwiderruflich löschen?',
+      async () => {
+        const activePin = pin || sessionStorage.getItem('admin_session_pin') || '';
+        try {
+          const response = await fetch(`/api/admin/promo?id=${id}`, {
+            method: 'DELETE',
+            headers: { 'x-admin-pin': activePin },
+          });
 
-    try {
-      const response = await fetch(`/api/admin/promo?id=${id}`, {
-        method: 'DELETE',
-        headers: { 'x-admin-pin': activePin },
-      });
-
-      if (response.ok) {
-        verifyAndLoad(activePin);
-      } else {
-        const data = await response.json();
-        alert(data.error || 'Löschen fehlgeschlagen.');
-      }
-    } catch (err) {
-      console.error(err);
-      alert('Fehler beim Löschen.');
-    }
+          if (response.ok) {
+            verifyAndLoad(activePin);
+          } else {
+            const data = await response.json();
+            customAlert('Fehler beim Löschen', data.error || 'Der Rabattcode konnte nicht gelöscht werden.');
+          }
+        } catch (err) {
+          console.error(err);
+          customAlert('Fehler', 'Verbindung zum Server fehlgeschlagen.');
+        }
+      },
+      true
+    );
   };
 
   const handleCreateEvent = async (e: React.FormEvent) => {
@@ -274,64 +309,66 @@ export default function AdminDashboard() {
   };
 
   const handleDeleteEvent = async (id: string, name: string) => {
-    const confirmDelete = confirm(
-      `Möchten Sie die Veranstaltung "${name}" wirklich löschen?\n` +
-      'Das ist nur möglich, wenn noch keine Tickets dafür gebucht wurden.'
+    customConfirm(
+      'Veranstaltung löschen',
+      `Möchten Sie die Veranstaltung "${name}" wirklich löschen?\n\nDas ist nur möglich, wenn noch keine Tickets dafür gebucht wurden.`,
+      async () => {
+        const activePin = pin || sessionStorage.getItem('admin_session_pin') || '';
+        try {
+          const response = await fetch(`/api/admin/events?id=${id}`, {
+            method: 'DELETE',
+            headers: { 'x-admin-pin': activePin },
+          });
+
+          const data = await response.json();
+          if (response.ok) {
+            verifyAndLoad(activePin);
+          } else {
+            customAlert('Fehler beim Löschen', data.error || 'Die Veranstaltung konnte nicht gelöscht werden.');
+          }
+        } catch (err: any) {
+          console.error(err);
+          customAlert('Fehler', 'Fehler beim Löschen: ' + err.message);
+        }
+      },
+      true
     );
-    if (!confirmDelete) return;
-
-    const activePin = pin || sessionStorage.getItem('admin_session_pin') || '';
-
-    try {
-      const response = await fetch(`/api/admin/events?id=${id}`, {
-        method: 'DELETE',
-        headers: { 'x-admin-pin': activePin },
-      });
-
-      const data = await response.json();
-      if (response.ok) {
-        verifyAndLoad(activePin);
-      } else {
-        alert(data.error || 'Löschen fehlgeschlagen.');
-      }
-    } catch (err: any) {
-      console.error(err);
-      alert('Fehler beim Löschen: ' + err.message);
-    }
   };
 
   const handleResetEvent = async (id: string, title: string) => {
-    const confirmReset = window.confirm(
-      `ACHTUNG (TESTBETRIEB):\n\nMöchten Sie wirklich ALLE Buchungen, Tickets und Belegungen für die Veranstaltung "${title}" unwiderruflich löschen?\n\nDadurch wird das Event komplett zurückgesetzt und alle Plätze werden wieder freigegeben. Diese Aktion kann nicht rückgängig gemacht werden!`
+    customConfirm(
+      'Veranstaltung zurücksetzen',
+      `ACHTUNG (TESTBETRIEB):\n\nMöchten Sie wirklich ALLE Buchungen, Tickets und Belegungen für die Veranstaltung "${title}" unwiderruflich löschen?\n\nDadurch wird das Event komplett zurückgesetzt und alle Plätze werden wieder freigegeben. Diese Aktion kann nicht rückgängig gemacht werden!`,
+      async () => {
+        const activePin = pin || sessionStorage.getItem('admin_session_pin') || '';
+        setLoading(true);
+
+        try {
+          const response = await fetch('/api/admin/events/reset', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'x-admin-pin': activePin,
+            },
+            body: JSON.stringify({ eventId: id }),
+          });
+
+          const data = await response.json();
+          if (response.ok && data.success) {
+            customAlert('Erfolg', 'Die Veranstaltung wurde erfolgreich zurückgesetzt.');
+            verifyAndLoad(activePin);
+          } else {
+            customAlert('Fehler', data.error || 'Zurücksetzen fehlgeschlagen.');
+          }
+        } catch (err: any) {
+          console.error(err);
+          customAlert('Fehler', 'Fehler beim Zurücksetzen: ' + err.message);
+        } finally {
+          setLoading(false);
+        }
+      },
+      true
     );
-    if (!confirmReset) return;
-
-    const activePin = pin || sessionStorage.getItem('admin_session_pin') || '';
-    setLoading(true);
-
-    try {
-      const response = await fetch('/api/admin/events/reset', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-admin-pin': activePin,
-        },
-        body: JSON.stringify({ eventId: id }),
-      });
-
-      const data = await response.json();
-      if (response.ok && data.success) {
-        alert('Veranstaltung erfolgreich zurückgesetzt.');
-        verifyAndLoad(activePin);
-      } else {
-        alert(data.error || 'Zurücksetzen fehlgeschlagen.');
-      }
-    } catch (err: any) {
-      console.error(err);
-      alert('Fehler beim Zurücksetzen: ' + err.message);
-    } finally {
-      setLoading(false);
-    }
   };
 
   const handleLogout = () => {
@@ -815,6 +852,102 @@ export default function AdminDashboard() {
           )}
         </section>
       </div>
+
+      {/* Custom Dialog Modal Popup */}
+      {modalConfig && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          width: '100%',
+          height: '100%',
+          backgroundColor: 'rgba(5, 2, 10, 0.85)',
+          backdropFilter: 'blur(8px)',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          zIndex: 9999,
+        }}>
+          <div style={{
+            background: 'var(--bg-surface)',
+            border: `1.5px solid ${modalConfig.isWarning ? '#ef444477' : 'var(--border)'}`,
+            borderRadius: '16px',
+            padding: '2rem',
+            maxWidth: '480px',
+            width: '90%',
+            boxShadow: '0 20px 50px rgba(0, 0, 0, 0.7)',
+            fontFamily: 'var(--font-sans)'
+          }}>
+            <h3 style={{
+              fontSize: '1.25rem',
+              fontWeight: '800',
+              color: modalConfig.isWarning ? '#fca5a5' : '#ffffff',
+              marginBottom: '1rem',
+              marginTop: 0,
+              fontFamily: 'var(--font-heading)',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.5rem',
+              letterSpacing: '0.02em'
+            }}>
+              {modalConfig.isWarning ? '⚠️ ' : ''}
+              {modalConfig.title}
+            </h3>
+            <p style={{
+              fontSize: '0.92rem',
+              color: 'var(--text-muted)',
+              lineHeight: '1.6',
+              marginBottom: '1.75rem',
+              whiteSpace: 'pre-wrap'
+            }}>
+              {modalConfig.message}
+            </p>
+            <div style={{
+              display: 'flex',
+              justifyContent: 'flex-end',
+              gap: '0.75rem'
+            }}>
+              {modalConfig.onCancel && (
+                <button
+                  type="button"
+                  onClick={modalConfig.onCancel}
+                  style={{
+                    padding: '0.55rem 1.25rem',
+                    borderRadius: '8px',
+                    border: '1px solid var(--border)',
+                    backgroundColor: 'rgba(255, 255, 255, 0.03)',
+                    color: 'var(--text)',
+                    fontSize: '0.85rem',
+                    fontWeight: '600',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s'
+                  }}
+                >
+                  Abbrechen
+                </button>
+              )}
+              <button
+                type="button"
+                onClick={modalConfig.onConfirm}
+                style={{
+                  padding: '0.55rem 1.25rem',
+                  borderRadius: '8px',
+                  border: 'none',
+                  backgroundColor: modalConfig.isWarning ? '#ef4444' : 'var(--primary)',
+                  color: modalConfig.isWarning ? '#ffffff' : '#090514',
+                  fontSize: '0.85rem',
+                  fontWeight: '700',
+                  cursor: 'pointer',
+                  boxShadow: modalConfig.isWarning ? '0 4px 12px rgba(239, 68, 68, 0.35)' : '0 4px 12px rgba(167, 139, 250, 0.35)',
+                  transition: 'all 0.2s'
+                }}
+              >
+                {modalConfig.onCancel ? 'Bestätigen' : 'OK'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </main>
   );
 }
