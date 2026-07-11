@@ -7,8 +7,8 @@
 }
 
 .container {
-  width: 100%;
-  max-width: 550px;
+  width: 95%;
+  max-width: 800px;
   padding: clamp(1rem, 6vw, 2.5rem);
   border-radius: 18px;
   animation: fadeIn 0.5s ease-out;
