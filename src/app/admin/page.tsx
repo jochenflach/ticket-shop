@@ -633,10 +633,11 @@ export default function AdminDashboard() {
                         <button
                           onClick={() => handleResetEvent(event.id, event.title)}
                           className={styles.deleteButton}
-                          style={{ backgroundColor: '#f97316', marginRight: '0.5rem' }}
+                          style={{ backgroundColor: '#e25c05', color: '#ffffff', border: 'none', marginRight: '0.5rem', display: 'inline-flex', gap: '0.35rem', padding: '0.4rem 0.65rem', fontSize: '0.75rem', fontWeight: '700' }}
                           title="Buchungen zurücksetzen (Testbetrieb)"
                         >
-                          <RotateCcw size={16} />
+                          <RotateCcw size={13} />
+                          <span>Zurücksetzen</span>
                         </button>
                         <button
                           onClick={() => handleDeleteEvent(event.id, event.title)}
