@@ -15,7 +15,8 @@ import {
   MapPin, 
   Compass, 
   ChevronRight,
-  Sparkles
+  Sparkles,
+  RotateCcw
 } from 'lucide-react';
 import styles from './admin.module.css';
 
@@ -296,6 +297,40 @@ export default function AdminDashboard() {
     } catch (err: any) {
       console.error(err);
       alert('Fehler beim Löschen: ' + err.message);
+    }
+  };
+
+  const handleResetEvent = async (id: string, title: string) => {
+    const confirmReset = window.confirm(
+      `ACHTUNG (TESTBETRIEB):\n\nMöchten Sie wirklich ALLE Buchungen, Tickets und Belegungen für die Veranstaltung "${title}" unwiderruflich löschen?\n\nDadurch wird das Event komplett zurückgesetzt und alle Plätze werden wieder freigegeben. Diese Aktion kann nicht rückgängig gemacht werden!`
+    );
+    if (!confirmReset) return;
+
+    const activePin = pin || sessionStorage.getItem('admin_session_pin') || '';
+    setLoading(true);
+
+    try {
+      const response = await fetch('/api/admin/events/reset', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-admin-pin': activePin,
+        },
+        body: JSON.stringify({ eventId: id }),
+      });
+
+      const data = await response.json();
+      if (response.ok && data.success) {
+        alert('Veranstaltung erfolgreich zurückgesetzt.');
+        verifyAndLoad(activePin);
+      } else {
+        alert(data.error || 'Zurücksetzen fehlgeschlagen.');
+      }
+    } catch (err: any) {
+      console.error(err);
+      alert('Fehler beim Zurücksetzen: ' + err.message);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -595,6 +630,14 @@ export default function AdminDashboard() {
                         </span>
                       </td>
                       <td>
+                        <button
+                          onClick={() => handleResetEvent(event.id, event.title)}
+                          className={styles.deleteButton}
+                          style={{ backgroundColor: '#f97316', marginRight: '0.5rem' }}
+                          title="Buchungen zurücksetzen (Testbetrieb)"
+                        >
+                          <RotateCcw size={16} />
+                        </button>
                         <button
                           onClick={() => handleDeleteEvent(event.id, event.title)}
                           className={styles.deleteButton}
