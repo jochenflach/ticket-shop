@@ -224,14 +224,15 @@
 
   <div class="wrapper">
     <header>
-      <h1>🔌 Stripe Live-Schaltung</h1>
-      <p>Schritt-für-Schritt-Anleitung zur Verknüpfung des echten Zahlungsanbieters</p>
+      <h1>🔌 Stripe- & Domain-Live-Schaltung</h1>
+      <p>Anleitung zur Verknüpfung des echten Zahlungsanbieters und deiner eigenen Webadresse</p>
     </header>
 
     <div class="steps-nav">
-      <div class="step-indicator active">1. API-Schlüssel</div>
-      <div class="step-indicator active">2. Webhook Setup</div>
+      <div class="step-indicator active">1. Stripe API-Key</div>
+      <div class="step-indicator active">2. Stripe Webhook</div>
       <div class="step-indicator active">3. Netlify Variablen</div>
+      <div class="step-indicator active">4. Subdomain-Integration</div>
     </div>
 
     <div class="alert">
@@ -293,6 +294,35 @@ Value: whsec_... (dein Signierschlüssel aus Schritt 2)
         </li>
         <li>Klicke unten auf <strong>Save</strong> (Speichern).</li>
         <li>Gehe im linken Menü auf den Reiter <strong>Deploys</strong>, klicke rechts auf <strong>Trigger deploy</strong> &rarr; <strong>Deploy site</strong>. <em>Der Server startet neu und wendet die neuen Live-Zahlungseinstellungen an.</em></li>
+      </ol>
+    </section>
+
+    <!-- Step 4: Subdomain Integration -->
+    <section class="card">
+      <h2>🌐 Schritt 4: Subdomain-Integration (Eigene Webadresse)</h2>
+      <p>Statt den Shop in ein enges iFrame auf deiner Webseite zu quetschen, betreibst du ihn am professionellsten auf einer eigenen Subdomain deiner Haupt-Webseite (z. B. <code>tickets.deine-homepage.de</code> oder <code>shop.deine-homepage.de</code>).</p>
+      
+      <h3>Vorteile der Subdomain-Lösung:</h3>
+      <ul style="margin-left: 1.5rem; margin-bottom: 1.5rem; color: var(--text-muted);">
+        <li><strong>Volles Vertrauen:</strong> Die Kunden bleiben optisch komplett auf deiner Domain (keine fremde Netlify-Adresse im Browser).</li>
+        <li><strong>Kein iFrame-Frust:</strong> Keine lästigen Scrollbalken, keine mobilen Zoom-Probleme oder abgeschnittene Ränder auf Smartphones.</li>
+        <li><strong>Sicherheit & Cookies:</strong> Keine Blockaden durch restriktive Drittanbieter-Cookie-Richtlinien (z. B. von Apple Safari), da Subdomains als First-Party eingestuft werden.</li>
+      </ul>
+
+      <h3>Wie es funktioniert:</h3>
+      <ol>
+        <li><strong>Subdomain beim Domain-Anbieter anlegen:</strong> Logge dich bei deinem Domain-Host (z. B. Strato, 1&1 IONOS, Hostinger) ein und erstelle eine neue Subdomain (z. B. <code>tickets.deine-homepage.de</code>).</li>
+        <li><strong>CNAME-Eintrag setzen:</strong> Konfiguriere für die neue Subdomain einen <strong>CNAME-Eintrag</strong> und verweise als Zieladresse direkt auf deine Netlify-Adresse:
+          <div class="code-block">wondrous-gumdrop-b59508.netlify.app</div>
+        </li>
+        <li><strong>Domain in Netlify hinzufügen:</strong>
+          <ul>
+            <li>Gehe in deinem Netlify-Projekt auf <strong>Site configuration</strong> &rarr; <strong>Domain management</strong>.</li>
+            <li>Klicke auf <strong>Add custom domain</strong> und trage deine neue Subdomain (z. B. <code>tickets.deine-homepage.de</code>) ein.</li>
+            <li>Netlify überprüft den CNAME-Eintrag und generiert automatisch das kostenlose SSL-Zertifikat (HTTPS) für deine Subdomain.</li>
+          </ul>
+        </li>
+        <li><strong>Auf der Hauptseite verlinken:</strong> Erstelle auf deiner Haupt-Homepage einfach einen auffälligen Button <em>"Tickets kaufen"</em>, der direkt zu deiner neuen Subdomain verlinkt.</li>
       </ol>
     </section>
 
