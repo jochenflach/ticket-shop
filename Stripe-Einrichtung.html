@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Stripe-Einrichtung | Ticketshop "Das Wilde Weib"</title>
+  <style>
+    :root {
+      --bg-dark: #090514;
+      --bg-surface: #130a24;
+      --border: #291a47;
+      --primary: #a78bfa;
+      --primary-hover: #c4b5fd;
+      --accent: #fbbf24;
+      --text: #f9fafb;
+      --text-muted: #9ca3af;
+      --success: #34d399;
+      --warning: #f97316;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      background-image: 
+        radial-gradient(circle at 15% 15%, rgba(139, 92, 246, 0.12) 0%, transparent 50%),
+        radial-gradient(circle at 85% 85%, rgba(16, 185, 129, 0.08) 0%, transparent 50%);
+      background-attachment: fixed;
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      line-height: 1.6;
+      padding: 2rem 1rem;
+    }
+
+    .wrapper {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 3rem;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 2rem;
+    }
+
+    h1 {
+      font-size: 2.2rem;
+      font-weight: 800;
+      color: #fff;
+      margin-bottom: 0.5rem;
+      letter-spacing: -0.02em;
+    }
+
+    header p {
+      color: var(--text-muted);
+      font-size: 1.1rem;
+    }
+
+    h2 {
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: var(--primary);
+      margin-top: 2rem;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 0.5rem;
+    }
+
+    h3 {
+      font-size: 1.1rem;
+      color: #fff;
+      margin-top: 1.5rem;
+      margin-bottom: 0.5rem;
+    }
+
+    p {
+      color: var(--text-muted);
+      margin-bottom: 1rem;
+      font-size: 1rem;
+    }
+
+    ol, ul {
+      margin-left: 1.5rem;
+      margin-bottom: 1.5rem;
+      color: var(--text-muted);
+    }
+
+    li {
+      margin-bottom: 0.5rem;
+    }
+
+    strong {
+      color: #fff;
+    }
+
+    .card {
+      background: rgba(19, 10, 36, 0.6);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.75rem;
+      margin-bottom: 2rem;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    }
+
+    .code-block {
+      background: rgba(0, 0, 0, 0.4);
+      border: 1px solid var(--border);
+      padding: 1rem;
+      border-radius: 8px;
+      font-family: monospace;
+      font-size: 0.9rem;
+      color: #38bdf8;
+      overflow-x: auto;
+      margin: 0.5rem 0 1.25rem 0;
+      position: relative;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 0.25rem 0.5rem;
+      font-size: 0.75rem;
+      font-weight: 700;
+      border-radius: 4px;
+      background: rgba(167, 139, 250, 0.15);
+      color: var(--primary);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .alert {
+      padding: 1.25rem;
+      border-radius: 8px;
+      border-left: 4px solid var(--warning);
+      background: rgba(249, 115, 22, 0.08);
+      margin-bottom: 1.5rem;
+    }
+
+    .alert h4 {
+      color: var(--warning);
+      font-size: 1rem;
+      margin-bottom: 0.25rem;
+      font-weight: 700;
+    }
+
+    .alert p {
+      color: var(--text);
+      font-size: 0.9rem;
+      margin: 0;
+    }
+
+    .steps-nav {
+      display: flex;
+      justify-content: space-between;
+      gap: 1rem;
+      margin-bottom: 2rem;
+      flex-wrap: wrap;
+    }
+
+    .step-indicator {
+      flex: 1;
+      text-align: center;
+      padding: 1rem;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: rgba(255, 255, 255, 0.02);
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+
+    .step-indicator.active {
+      border-color: var(--primary);
+      background: rgba(167, 139, 250, 0.05);
+      color: var(--primary);
+      font-weight: 700;
+    }
+
+    .checklist {
+      list-style-type: none;
+      margin-left: 0;
+    }
+
+    .checklist li {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.5rem;
+    }
+
+    .checklist li::before {
+      content: '✓';
+      color: var(--success);
+      font-weight: bold;
+    }
+
+    footer {
+      text-align: center;
+      padding-top: 2rem;
+      border-top: 1px solid var(--border);
+      margin-top: 4rem;
+      color: var(--text-muted);
+      font-size: 0.85rem;
+    }
+
+    a {
+      color: var(--primary);
+      text-decoration: none;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="wrapper">
+    <header>
+      <h1>🔌 Stripe Live-Schaltung</h1>
+      <p>Schritt-für-Schritt-Anleitung zur Verknüpfung des echten Zahlungsanbieters</p>
+    </header>
+
+    <div class="steps-nav">
+      <div class="step-indicator active">1. API-Schlüssel</div>
+      <div class="step-indicator active">2. Webhook Setup</div>
+      <div class="step-indicator active">3. Netlify Variablen</div>
+    </div>
+
+    <div class="alert">
+      <h4>ℹ️ Funktionsweise der Stripe-Umschaltung</h4>
+      <p>Im Code ist bereits alles vorbereitet. Solange keine echten Stripe-Umgebungsvariablen hinterlegt sind, schaltet der Shop automatisch in den <strong>Zahlungssimulations-Modus</strong>. Sobald die Keys eingetragen werden, ist die echte Zahlungsmaske sofort live.</p>
+    </div>
+
+    <!-- Step 1 -->
+    <section class="card">
+      <h2>🔑 Schritt 1: Stripe-Konto & API-Keys holen</h2>
+      <p>Stripe wickelt die Kreditkarten-, Lastschrift- und Smartphone-Zahlungen ab und überweist das Geld auf dein Bankkonto.</p>
+      <ol>
+        <li>Erstelle ein Konto auf <a href="https://stripe.com" target="_blank">Stripe.com</a>.</li>
+        <li>Aktiviere dein Konto für den echten Zahlungsverkehr (oder bleibe oben rechts im <strong>Test-Modus</strong> für Probezahlungen).</li>
+        <li>Navigiere im Stripe-Menü auf: <strong>Entwickler</strong> &rarr; <strong>API-Schlüssel</strong>.</li>
+        <li>Kopiere dort den <strong>Geheimen Schlüssel</strong> (Secret Key).</li>
+      </ol>
+      <div class="alert" style="border-left-color: var(--primary); background: rgba(167, 139, 250, 0.04);">
+        <p><strong>Hinweis zum Key-Format:</strong> Im Testbetrieb lautet der Schlüssel z. B. <code>sk_test_51P...</code>, im echten Live-Betrieb beginnt er mit <code>sk_live_...</code>.</p>
+      </div>
+    </section>
+
+    <!-- Step 2 -->
+    <section class="card">
+      <h2>🌐 Schritt 2: Webhook in Stripe einrichten</h2>
+      <p>Ein Webhook ist eine automatische Benachrichtigung. Sobald ein Kunde bei Stripe bezahlt hat, schickt Stripe ein Signal an unseren Server. Erst dadurch werden die Tickets generiert und per Mail versendet.</p>
+      <ol>
+        <li>Navigiere im Stripe-Dashboard auf <strong>Entwickler</strong> &rarr; <strong>Webhooks</strong>.</li>
+        <li>Klicke oben rechts auf <strong>Endpunkt hinzufügen</strong>.</li>
+        <li>Trage bei <strong>Endpunkt-URL</strong> deine Netlify-Scanner-Adresse ein:
+          <div class="code-block">https://wondrous-gumdrop-b59508.netlify.app/api/webhook/stripe</div>
+        </li>
+        <li>Klicke auf <strong>+ Ereignisse auswählen</strong>, suche in der Liste nach:
+          <br><strong><code>checkout.session.completed</code></strong> (Zahlung erfolgreich abgeschlossen) und hake es an.
+        </li>
+        <li>Klicke auf <strong>Endpunkt hinzufügen</strong>.</li>
+        <li>Klicke unter dem erstellten Webhook auf <strong>"Signierschlüssel anzeigen"</strong> und kopiere diesen geheimen Schlüssel (beginnt mit <code>whsec_...</code>).</li>
+      </ol>
+    </section>
+
+    <!-- Step 3 -->
+    <section class="card">
+      <h2>🚀 Schritt 3: Keys in Netlify eintragen</h2>
+      <p>Um die Zugangsdaten sicher zu hinterlegen, tragen wir sie direkt bei Netlify ein (so sind sie für Kunden unsichtbar geschützt).</p>
+      <ol>
+        <li>Logge dich auf <a href="https://netlify.com" target="_blank">Netlify.com</a> ein und wähle dein Projekt <strong>"wondrous-gumdrop-b59508"</strong> aus.</li>
+        <li>Gehe im Menü auf <strong>Site configuration</strong> &rarr; <strong>Build & deploy</strong> &rarr; <strong>Environment variables</strong>.</li>
+        <li>Klicke auf <strong>Add a variable</strong> &rarr; <strong>Create single variable</strong> und trage ein:
+          <h3>1. Stripe Secret Key</h3>
+          <div class="code-block">
+Key:   STRIPE_SECRET_KEY
+Value: sk_test_... (dein Secret Key aus Schritt 1)
+          </div>
+          <h3>2. Stripe Webhook Secret</h3>
+          <div class="code-block">
+Key:   STRIPE_WEBHOOK_SECRET
+Value: whsec_... (dein Signierschlüssel aus Schritt 2)
+          </div>
+        </li>
+        <li>Klicke unten auf <strong>Save</strong> (Speichern).</li>
+        <li>Gehe im linken Menü auf den Reiter <strong>Deploys</strong>, klicke rechts auf <strong>Trigger deploy</strong> &rarr; <strong>Deploy site</strong>. <em>Der Server startet neu und wendet die neuen Live-Zahlungseinstellungen an.</em></li>
+      </ol>
+    </section>
+
+    <!-- Checklist -->
+    <section class="card">
+      <h2>✅ Checkliste nach der Einrichtung</h2>
+      <p>So überprüfst du, ob alles reibungslos funktioniert:</p>
+      <ul class="checklist">
+        <li>Öffne den Ticketshop und lege ein Ticket in den Warenkorb.</li>
+        <li>Klicke auf den Button "Kostenpflichtig buchen". Du wirst direkt auf die sichere Bezahlseite von <strong>stripe.com</strong> weitergeleitet.</li>
+        <li>Führe eine Testzahlung durch (Stripe bietet im Test-Modus Spielgeld-Karten zum Ausprobieren an).</li>
+        <li>Nach der Zahlung wirst du zurück auf die Erfolgsseite des Shops geleitet und siehst dein Ticket.</li>
+        <li>Prüfe im Admin-Dashboard unter <strong>Geplante Veranstaltungen</strong> &rarr; <strong>Ticket-Statistiken</strong>, ob das Ticket korrekt erfasst wurde und der Umsatz aktualisiert wurde.</li>
+      </ul>
+    </section>
+
+    <footer>
+      <p>© 2026 Ticketshop "Das Wilde Weib" | Administrations-Leitfaden</p>
+    </footer>
+  </div>
+
+</body>
+</html>
