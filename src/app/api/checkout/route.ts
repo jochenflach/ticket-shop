@@ -223,7 +223,7 @@ export async function POST(request: Request) {
       });
 
       const stripeSession = await stripe.checkout.sessions.create({
-        payment_method_types: ['card', 'sepa_debit'],
+        payment_method_types: ['card', 'paypal', 'sepa_debit'],
         line_items: stripeLineItems,
         mode: 'payment',
         success_url: `${origin}/checkout/success?orderId=${pendingOrder.id}&stripe_session_id={CHECKOUT_SESSION_ID}`,
