@@ -333,7 +333,14 @@ Value: whsec_... (dein Signierschlüssel aus Schritt 2)
       <ul class="checklist">
         <li>Öffne den Ticketshop und lege ein Ticket in den Warenkorb.</li>
         <li>Klicke auf den Button "Kostenpflichtig buchen". Du wirst direkt auf die sichere Bezahlseite von <strong>stripe.com</strong> weitergeleitet.</li>
-        <li>Führe eine Testzahlung durch (Stripe bietet im Test-Modus Spielgeld-Karten zum Ausprobieren an).</li>
+        <li>Führe eine Testzahlung durch mit folgenden Testdaten:
+          <div class="code-block" style="color: #34d399;">
+Kartennummer: 4242 4242 4242 4242
+Ablaufdatum:  Ein beliebiges zukünftiges Datum (z.B. 12 / 29)
+CVC-Code:     Drei beliebige Ziffern (z.B. 123)
+PLZ:          Eine beliebige Postleitzahl (z.B. 12345)
+          </div>
+        </li>
         <li>Nach der Zahlung wirst du zurück auf die Erfolgsseite des Shops geleitet und siehst dein Ticket.</li>
         <li>Prüfe im Admin-Dashboard unter <strong>Geplante Veranstaltungen</strong> &rarr; <strong>Ticket-Statistiken</strong>, ob das Ticket korrekt erfasst wurde und der Umsatz aktualisiert wurde.</li>
       </ul>
